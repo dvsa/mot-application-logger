@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="./vendor/autoload.php" stopOnFailure="false" beStrictAboutTestsThatDoNotTestAnything="true" beStrictAboutOutputDuringTests="true" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+    <coverage includeUncoveredFiles="true" processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">src/*</directory>
+        </include>
+        <report>
+            <html outputDirectory="build/coverage"/>
+        </report>
+    </coverage>
+    <testsuites>
+        <testsuite name="Dvsa Application Logger Test Suite">
+            <directory>test/*</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

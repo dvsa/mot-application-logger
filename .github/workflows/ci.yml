@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * 1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    uses: dvsa/.github/.github/workflows/php-static.yml@v3.2.2
+
+  test:
+    uses: dvsa/.github/.github/workflows/php-tests.yml@v3.2.2
+    with:
+      php-versions: "[\"8.0\", \"8.1\"]"
+
+  security:
+    uses: dvsa/.github/.github/workflows/php-security.yml@v3.2.2
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
