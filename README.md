@@ -1,2 +1,3 @@
 # mot-application-logger
-Logging service for MOT testing application
+
+Utility for logging MOT Web App and API exceptions to defined formats.

@@ -1,0 +1,43 @@
+{
+    "name": "dvsa/mot-application-logger",
+    "description": "Utility for logging MOT Web App and API exceptions to defined formats.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laminas",
+        "logging"
+    ],
+    "require": {
+        "php": "^8.0",
+        "laminas/laminas-dependency-plugin": "^2",
+        "laminas/laminas-eventmanager": "^3.2",
+        "laminas/laminas-log": "^2.10",
+        "laminas/laminas-mvc": "^3.1",
+        "laminas/laminas-mvc-plugin-prg": "^1.1",
+        "laminas/laminas-servicemanager": "^3.10.0"
+    },
+    "require-dev": {
+        "captainhook/captainhook": "^5.16",
+        "captainhook/plugin-composer": "^5.3",
+        "dvsa/coding-standards": "1.0.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "DvsaApplicationLogger\\": "src",
+            "DvsaApplicationLoggerTest\\": "test"
+        },
+        "classmap": [
+            "Module.php"
+        ]
+    },
+    "scripts" : {
+        "test": "vendor/bin/phpunit -c phpunit.xml"
+    },
+    "config": {
+        "allow-plugins": {
+            "laminas/laminas-dependency-plugin": true,
+            "captainhook/plugin-composer": true
+        }
+    }
+}
