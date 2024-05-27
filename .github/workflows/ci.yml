@@ -2,10 +2,10 @@ name: CI
 
 on:
   push:
-    branches: 
+    branches:
       - 'main'
   pull_request:
-    branches: 
+    branches:
       - 'main'
   schedule:
     - cron: '0 0 * * 1'
@@ -18,18 +18,18 @@ jobs:
   static:
     uses: dvsa/.github/.github/workflows/php-static.yml@v4.1.0
     with:
-      php-version: "8.1"      
+      php-version: "8.2"
       composer-version: 'v2.2.24'
 
   test:
     uses: dvsa/.github/.github/workflows/php-tests.yml@v4.1.0
     with:
-      php-versions: "[\"8.0\", \"8.1\"]"      
+      php-versions: "[\"8.2\"]"
       composer-version: 'v2.2.24'
 
   security:
     uses: dvsa/.github/.github/workflows/php-security.yml@v4.1.0
     with:
-      php-version: '8.1'
+      php-version: '8.2'
     secrets:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
