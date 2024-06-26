@@ -1,11 +1,13 @@
 <?php
 
+namespace DvsaApplicationLoggerTest\Logger\Processor;
+
 use DvsaApplicationLogger\Log\Logger;
 use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
 
 class ReplaceTraceArgsProcessorTest extends \DvsaApplicationLoggerTest\Formatter\TestCase
 {
-    const PASSWORD = "secretPassword";
+    private const PASSWORD = "secretPassword";
 
     /** @var  ReplaceTraceArgsProcessor */
     private $sut;

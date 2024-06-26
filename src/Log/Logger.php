@@ -15,14 +15,14 @@ use Laminas\Log\Logger as LaminasLogger;
  */
 class Logger extends LaminasLogger
 {
-    const ZEND_LOGGER_CRIT_LOG_LEVEL = 'CRIT';
-    const ZEND_LOGGER_EMERG_LOG_LEVEL = 'EMERG';
-    const ZEND_LOGGER_ERROR_LOG_LEVEL = 'ERR';
-    const ERROR_LOG_LEVEL = 'ERROR';
-    const ZEND_LOGGER_NOTICE_LOG_LEVEL = 'NOTICE';
-    const INFO_LOG_LEVEL = 'INFO';
-    const ZEND_LOGGER_ALERT_LOG_LEVEL = 'ALERT';
-    const WARN_LOG_LEVEL = 'WARN';
+    public const ERROR_LOG_LEVEL = 'ERROR';
+    public const INFO_LOG_LEVEL = 'INFO';
+    public const WARN_LOG_LEVEL = 'WARN';
+    private const ZEND_LOGGER_CRIT_LOG_LEVEL = 'CRIT';
+    private const ZEND_LOGGER_EMERG_LOG_LEVEL = 'EMERG';
+    private const ZEND_LOGGER_ERROR_LOG_LEVEL = 'ERR';
+    private const ZEND_LOGGER_NOTICE_LOG_LEVEL = 'NOTICE';
+    private const ZEND_LOGGER_ALERT_LOG_LEVEL = 'ALERT';
 
     /**
      * Used to check if log method is invoked from Laminas\Log\Logger so the stacktrace is deeper

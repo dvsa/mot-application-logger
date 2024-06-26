@@ -7,7 +7,7 @@ class FilteredStackTrace
     /**
      * Arguments to hide from stack trace as regex.
      */
-    const TRACE_EXCLUSIONS = "/^(password|pwd|pass|newPassword)$/";
+    private const TRACE_EXCLUSIONS = "/^(password|pwd|pass|newPassword)$/";
 
     /**
      * Returns stack trace string similar to exception->getTraceAsString(), but with certain args blanked out

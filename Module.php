@@ -17,7 +17,7 @@ use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 
 class Module
 {
-    const FULL_STACK_LOGGING_SERVICE_NAME = 'DvsaCommon\FullStackLogging\Service\FullStackLoggingService';
+    private const FULL_STACK_LOGGING_SERVICE_NAME = 'DvsaCommon\FullStackLogging\Service\FullStackLoggingService';
 
     public function getConfig()
     {
