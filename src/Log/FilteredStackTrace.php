@@ -40,6 +40,7 @@ class FilteredStackTrace
         $currentFile = isset($line['file']) ? $line['file'] : "[internal function]";
         $currentLine = isset($line['line']) ? $line['line'] : "";
         $className = isset($line['class']) ? $line['class'] : null;
+        /** @var callable-string */
         $function = isset($line['function']) ? $line['function'] : "";
         $fullyQualifiedFunction = $className != null ? $className . "->" . $function : $function;
 
@@ -69,8 +70,8 @@ class FilteredStackTrace
 
     /**
      * From a method/function name and class, returns array of argument names
-     * @param string $function
-     * @param null | string $className
+     * @param callable-string $function
+     * @param class-string|null $className
      * @return array
      */
     protected function getArgumentNames($function, $className)

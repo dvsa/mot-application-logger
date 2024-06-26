@@ -100,7 +100,7 @@ class LoggerTest extends TestCase
             ->method('getIdentity')
             ->willReturn($mockMotIdentity);
 
-        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->setMethods(['requestIsConsole'])->getMock();
+        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->onlyMethods(['requestIsConsole'])->getMock();
         $mockSapiHelper
             ->method('requestIsConsole')
             ->willReturnOnConsecutiveCalls(true, false);
@@ -108,7 +108,7 @@ class LoggerTest extends TestCase
         $consoleMock = $this->createMock(ContainerInterface::class);
         $consoleMock->expects($this->any())
              ->method('get')
-             ->will($this->returnCallback(function ($arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor) {
+             ->will($this->returnCallback(function (mixed $arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor) {
                  $map = [
                      'Config' => ['DvsaApplicationLogger' => []],
                      'MotIdentityProvider' => null,
@@ -120,10 +120,10 @@ class LoggerTest extends TestCase
              }));
         $httpMock->expects($this->any())
              ->method('get')
-             ->will($this->returnCallback(function ($arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor, $mockIdentityProvider) {
+             ->will($this->returnCallback(function (mixed $arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor, $mockIdentityProvider) {
                  $map = array(
                      'Config' => ['DvsaApplicationLogger' => []],
-                     'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                     'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->onlyMethods(['getToken'])->getMock(),
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,
                      'MotIdentityProvider' => $mockIdentityProvider,
@@ -181,10 +181,10 @@ class LoggerTest extends TestCase
 
         $httpMock->expects($this->any())
              ->method('get')
-             ->will($this->returnCallback(function ($arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper, $mockIdentityProvider) {
+             ->will($this->returnCallback(function (mixed $arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper, $mockIdentityProvider) {
                  $map = array(
                      'Config' => ['DvsaApplicationLogger' => []],
-                     'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                     'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->onlyMethods(['getToken'])->getMock(),
                      SapiHelper::class => $mockSapiHelper,
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,

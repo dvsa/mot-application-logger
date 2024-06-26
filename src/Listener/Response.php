@@ -7,7 +7,7 @@ use Laminas\EventManager\EventManagerInterface;
 use Laminas\Log\Writer\WriterInterface;
 use Laminas\Log\Logger as Log;
 use Laminas\Mvc\MvcEvent;
-use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Http\PhpEnvironment\Request as PhpRequest;
 use Laminas\Http\PhpEnvironment\Response as PhpResponse;
 
 /**
@@ -19,6 +19,7 @@ class Response implements ListenerAggregateInterface
 {
     /**
      * @var Log
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     protected $log;
 
@@ -95,6 +96,7 @@ class Response implements ListenerAggregateInterface
 
     /**
      * @param EventManagerInterface $events
+     * @param int $priority
      *
      * @todo is this method redundant now the listeners are attached in Module.php?
      */
@@ -120,16 +122,17 @@ class Response implements ListenerAggregateInterface
      */
     public function logResponse(MvcEvent $event): void
     {
-        if ($event->getRequest() instanceof \Laminas\Http\PhpEnvironment\Request) {
-            /** @var Request */
-            $request = $event->getRequest();
+        $request = $event->getRequest();
+        if ($request instanceof PhpRequest) {
             /** @var PhpResponse */
             $response = $event->getResponse();
+            /** @var string */
+            $host = $request->getUri()->getHost();
 
             $this->getLog()->debug(
                 print_r(
                     array(
-                        $request->getUri()->getHost() => array(
+                         $host => array(
                             'Response' => array(
                                 'statusCode' => $response->getStatusCode(),
                                 'content'    => $response->getContent()

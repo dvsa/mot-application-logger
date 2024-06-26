@@ -10,6 +10,8 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
+     * @param string|null $name
+     *
      * @return ReplaceTraceArgsProcessor
      */
     public function __invoke(ContainerInterface $container, $name, array $options = null)

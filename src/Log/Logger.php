@@ -6,6 +6,7 @@ use Exception;
 use Interop\Container\ContainerInterface;
 use Laminas\Log\Logger as LaminasLogger;
 use DvsaApplicationLogger\Interfaces\MotIdentityProviderInterface;
+use Traversable;
 
 /**
  * This is a bespoke logger class for the DVSA MOT project. It tracks
@@ -13,6 +14,8 @@ use DvsaApplicationLogger\Interfaces\MotIdentityProviderInterface;
  * when an exception is thrown.
  *
  * @package DvsaApplicationLogger\Log
+ *
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 class Logger extends LaminasLogger
 {
@@ -61,7 +64,7 @@ class Logger extends LaminasLogger
     /** @var ContainerInterface */
     private $serviceLocator;
 
-    public function __construct($options, SystemLogLogger $systemLogLogger, ContainerInterface $serviceLocator)
+    public function __construct(array $options, SystemLogLogger $systemLogLogger, ContainerInterface $serviceLocator)
     {
         $this->serviceLocator = $serviceLocator;
         $this->errorLogLogger = $systemLogLogger;
@@ -153,19 +156,21 @@ class Logger extends LaminasLogger
      *
      * @param int $priority
      * @param mixed $message
-     * @param array $extra
+     * @param array|Traversable $extra
      * @return $this
      */
     public function log($priority, $message, $extra = [])
     {
         $metadata = $this->getBasicMetadata($priority);
 
-        if (isset($extra['ex']) && $extra['ex'] instanceof \Throwable) {
-            $metadata += $this->getExceptionMetadata($extra['ex']);
-            unset($extra['ex']);
-        }
+        if (is_array($extra)) {
+            if (isset($extra['ex']) && $extra['ex'] instanceof \Throwable) {
+                $metadata += $this->getExceptionMetadata($extra['ex']);
+                unset($extra['ex']);
+            }
 
-        $extra['__dvsa_metadata__'] = $metadata;
+            $extra['__dvsa_metadata__'] = $metadata;
+        }
 
         // I think we're sending mixed messages here
         parent::log($priority, $message, $extra);

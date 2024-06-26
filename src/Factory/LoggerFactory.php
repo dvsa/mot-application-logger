@@ -23,6 +23,8 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 /**
  * Class LoggerFactory.
  * @package DvsaApplicationLogger\Factory
+ *
+ * @psalm-suppress MissingConstructor
  */
 class LoggerFactory implements FactoryInterface
 {

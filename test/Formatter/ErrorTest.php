@@ -2,13 +2,15 @@
 
 namespace DvsaApplicationLoggerTest\Formatter;
 
+use DvsaApplicationLogger\Formatter\General;
 use DvsaApplicationLogger\Formatter\Error;
+use DvsaApplicationLogger\Formatter\Json;
 use DvsaApplicationLoggerTest\Formatter;
 
 class ErrorTest extends TestCase
 {
     /**
-     * @var Error
+     * @var General|Error|Json
      */
     protected $formatter;
 

@@ -34,7 +34,7 @@ class ReplaceTraceArgsProcessor implements ProcessorInterface
             if (!empty($event["extra"]["trace"])) {
                 $trace = &$event["extra"]["trace"];
 
-                array_walk_recursive($trace, function (&$item) {
+                array_walk_recursive($trace, function (mixed &$item) {
                     if (is_string($item)) {
                         $item = str_replace($this->replaceFrom, $this->replaceTo, $item);
                     }

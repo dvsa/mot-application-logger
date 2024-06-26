@@ -74,7 +74,7 @@ class ReplaceTraceArgsProcessorTest extends \DvsaApplicationLoggerTest\Formatter
     private function assertStringIsNotPresentInArray(array $trace): void
     {
         $count = 0;
-        array_walk_recursive($trace, function ($item) use (&$count) {
+        array_walk_recursive($trace, function (mixed $item) use (&$count) {
             if ($item == self::PASSWORD) {
                 $count++;
             }
@@ -86,7 +86,7 @@ class ReplaceTraceArgsProcessorTest extends \DvsaApplicationLoggerTest\Formatter
     private function assertStringIsPresentInArray(array $trace): void
     {
         $count = 0;
-        array_walk_recursive($trace, function ($item) use (&$count) {
+        array_walk_recursive($trace, function (mixed $item) use (&$count) {
             if ($item == self::PASSWORD) {
                 $count++;
             }

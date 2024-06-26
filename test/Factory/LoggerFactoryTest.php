@@ -20,7 +20,7 @@ class LoggerFactoryTest extends TestCase
         $mock = $this
             ->getMockBuilder(\Laminas\ServiceManager\ServiceManager::class)
             ->disableOriginalConstructor()
-            ->setMethods(['get'])
+            ->onlyMethods(['get'])
             ->getMock();
 
         $mock->expects($this->once())
@@ -47,19 +47,19 @@ class LoggerFactoryTest extends TestCase
 
         $replaceTraceProcessor = new ReplaceTraceArgsProcessor(["asd" => "asdasd"]);
 
-        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->setMethods(['requestIsConsole'])->getMock();
+        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->onlyMethods(['requestIsConsole'])->getMock();
         $mockSapiHelper->expects($this->atLeastOnce())
             ->method('requestIsConsole')
             ->willReturn($isConsoleRequest);
-        $mockContainer = $this->getMockBuilder(ContainerInterface::class)->disableOriginalConstructor()->setMethods(['get', 'has'])->getMock();
+        $mockContainer = $this->getMockBuilder(ContainerInterface::class)->disableOriginalConstructor()->onlyMethods(['get', 'has'])->getMock();
 
         $mockContainer->expects($this->atLeastOnce())
             ->method('get')
-            ->will($this->returnCallback(function ($arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper) {
+            ->will($this->returnCallback(function (mixed $arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper) {
                 $map = array(
                     'Config' => ['DvsaApplicationLogger' => []],
                     SapiHelper::class => $mockSapiHelper,
-                    'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                    'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->onlyMethods(['getToken'])->getMock(),
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,
                     'MotIdentityProvider' => null

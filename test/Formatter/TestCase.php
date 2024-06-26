@@ -3,11 +3,13 @@
 namespace DvsaApplicationLoggerTest\Formatter;
 
 use DvsaApplicationLogger\Formatter\General;
+use DvsaApplicationLogger\Formatter\Error;
+use DvsaApplicationLogger\Formatter\Json;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var General
+     * @var General|Error|Json
      */
     protected $formatter;
 
