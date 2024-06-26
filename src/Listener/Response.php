@@ -1,4 +1,5 @@
 <?php
+
 namespace DvsaApplicationLogger\Listener;
 
 use Laminas\EventManager\ListenerAggregateInterface;
@@ -14,7 +15,6 @@ use Laminas\Mvc\MvcEvent;
  */
 class Response implements ListenerAggregateInterface
 {
-
     /**
      * @var Log
      */
@@ -119,7 +119,7 @@ class Response implements ListenerAggregateInterface
      */
     public function logResponse(MvcEvent $event)
     {
-        if ($event->getRequest() instanceOf \Laminas\Http\PhpEnvironment\Request) {
+        if ($event->getRequest() instanceof \Laminas\Http\PhpEnvironment\Request) {
             $this->getLog()->debug(
                 print_r(
                     array(
@@ -129,8 +129,7 @@ class Response implements ListenerAggregateInterface
                                 'content'    => $event->getResponse()->getContent()
                             )
                         )
-                    )
-                    ,
+                    ),
                     true
                 )
             );
@@ -142,7 +141,7 @@ class Response implements ListenerAggregateInterface
      */
     public function shutdown(EventInterface $event)
     {
-        foreach($this->getLog()->getWriters() as $writer) {
+        foreach ($this->getLog()->getWriters() as $writer) {
             $writer->shutdown();
         }
     }

@@ -1,4 +1,5 @@
 <?php
+
 namespace DvsaApplicationLoggerTest\Formatter;
 
 use DvsaApplicationLogger\Formatter\Error;
@@ -29,7 +30,7 @@ class ErrorTest extends TestCase
         'stacktrace' => '',
     ];
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new Error();
     }

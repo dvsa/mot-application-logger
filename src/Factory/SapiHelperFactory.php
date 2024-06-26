@@ -24,7 +24,6 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
  */
 class SapiHelperFactory implements FactoryInterface
 {
-
     /**
      * @var SapiHelper $helper
      */
@@ -52,5 +51,4 @@ class SapiHelperFactory implements FactoryInterface
         $this->helper = new SapiHelper();
         return $this->helper;
     }
-
 }

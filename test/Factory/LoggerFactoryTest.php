@@ -10,7 +10,6 @@ use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 
-
 class LoggerFactoryTest extends TestCase
 {
     public function testExceptionIsThrownIfNoConfigIsProvided()
@@ -66,7 +65,7 @@ class LoggerFactoryTest extends TestCase
                     'MotIdentityProvider' => null
                 );
                 return $map[$arg];
-        }));
+            }));
 
         $factory = new LoggerFactory();
         $logger = $factory($mockContainer, null, []);

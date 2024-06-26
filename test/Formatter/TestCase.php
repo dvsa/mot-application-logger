@@ -2,7 +2,6 @@
 
 namespace DvsaApplicationLoggerTest\Formatter;
 
-
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
@@ -10,7 +9,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected $formatter;
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new General();
     }

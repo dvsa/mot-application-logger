@@ -27,7 +27,8 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
     {
         $replaceMap = [];
 
-        if(isset($config['DvsaApplicationLogger']['maskDatabaseCredentials'])
+        if (
+            isset($config['DvsaApplicationLogger']['maskDatabaseCredentials'])
             && isset($config["doctrine"]["connection"]["orm_default"]["params"])
         ) {
             $maskCredentialsConfig = $config['DvsaApplicationLogger']['maskDatabaseCredentials'];
@@ -36,8 +37,8 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
 
             $doctrineConnectionParams = $config["doctrine"]["connection"]["orm_default"]["params"];
 
-            if(!empty($argsToMask)) {
-                foreach($argsToMask as $arg) {
+            if (!empty($argsToMask)) {
+                foreach ($argsToMask as $arg) {
                     $replaceMap[$doctrineConnectionParams[$arg]] = $mask;
                 }
             }

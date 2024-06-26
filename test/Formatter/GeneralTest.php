@@ -29,7 +29,7 @@ class GeneralTest extends TestCase
      */
     protected $formatter;
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new General();
     }
@@ -122,10 +122,11 @@ class GeneralTest extends TestCase
         $this->assertStringEndsWith($expectedString, $this->formatter->format($event));
     }
 
-    private static function flattenTime($time) {
+    private static function flattenTime($time)
+    {
         $flatTime = '';
         foreach ($time as $key => $value) {
-            $flatTime = $flatTime.$value;
+            $flatTime = $flatTime . $value;
         }
         return $flatTime;
     }

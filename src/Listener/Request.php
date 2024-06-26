@@ -1,4 +1,5 @@
 <?php
+
 namespace DvsaApplicationLogger\Listener;
 
 use Laminas\EventManager\ListenerAggregateInterface;
@@ -14,7 +15,6 @@ use Laminas\Mvc\MvcEvent;
  */
 class Request implements ListenerAggregateInterface
 {
-
     /**
      * @var Log
      */
@@ -118,15 +118,14 @@ class Request implements ListenerAggregateInterface
      */
     public function logRequest(MvcEvent $event)
     {
-        if ($event->getRequest() instanceOf \Laminas\Http\PhpEnvironment\Request) {
+        if ($event->getRequest() instanceof \Laminas\Http\PhpEnvironment\Request) {
             $this->getLog()->debug(
                 print_r(
                     array(
                         $event->getRequest()->getUri()->getHost() => array(
                             'Request' => $event->getRequest()->getUri()
                         )
-                    )
-                    ,
+                    ),
                     true
                 )
             );

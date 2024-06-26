@@ -9,7 +9,6 @@ use DvsaApplicationLogger\Log\Logger;
 use DvsaApplicationLogger\Log\SystemLogLogger;
 use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
 use DvsaApplicationLogger\Log\FilteredStackTrace;
-
 use DvsaCommon\Auth\MotIdentity;
 use DvsaCommon\Auth\MotIdentityProvider;
 use Laminas\Stdlib\SplPriorityQueue;

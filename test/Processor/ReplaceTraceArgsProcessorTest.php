@@ -10,7 +10,7 @@ class ReplaceTraceArgsProcessorTest extends \DvsaApplicationLoggerTest\Formatter
     /** @var  ReplaceTraceArgsProcessor */
     private $sut;
 
-    public function setUp():void
+    public function setUp(): void
     {
         $replacementMap = [
             self::PASSWORD => "********",
@@ -72,8 +72,8 @@ class ReplaceTraceArgsProcessorTest extends \DvsaApplicationLoggerTest\Formatter
     private function assertStringIsNotPresentInArray($trace)
     {
         $count = 0;
-        array_walk_recursive($trace, function($item) use (&$count) {
-            if($item == self::PASSWORD) {
+        array_walk_recursive($trace, function ($item) use (&$count) {
+            if ($item == self::PASSWORD) {
                 $count++;
             }
         });
@@ -84,9 +84,9 @@ class ReplaceTraceArgsProcessorTest extends \DvsaApplicationLoggerTest\Formatter
     private function assertStringIsPresentInArray($trace)
     {
         $count = 0;
-        array_walk_recursive($trace, function($item) use (&$count) {
-            if($item == self::PASSWORD) {
-                $count ++;
+        array_walk_recursive($trace, function ($item) use (&$count) {
+            if ($item == self::PASSWORD) {
+                $count++;
             }
         });
 

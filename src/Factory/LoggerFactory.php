@@ -24,7 +24,6 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
  */
 class LoggerFactory implements FactoryInterface
 {
-
     /**
      * @var Logger $logger
      */
@@ -119,8 +118,8 @@ class LoggerFactory implements FactoryInterface
             $writers = 0;
             foreach ($config['writers'] as $writer) {
                 if ($writer['enabled']) {
-                    $this->writerAdapter( $writer );
-                    $writers ++;
+                    $this->writerAdapter($writer);
+                    $writers++;
                 }
             }
             return $writers;
@@ -161,7 +160,7 @@ class LoggerFactory implements FactoryInterface
     private function configuration(array $config)
     {
         if (!empty($config['registerExceptionHandler'])) {
-            $config['registerExceptionHandler'] === false ?: LaminasLogger::registerExceptionHandler( $this->logger );
+            $config['registerExceptionHandler'] === false ?: LaminasLogger::registerExceptionHandler($this->logger);
         }
     }
 
@@ -171,7 +170,7 @@ class LoggerFactory implements FactoryInterface
     private function fallbackOnNoopWriter()
     {
         if ($this->logger->getWriters()->count() == 0) {
-            return $this->logger->addWriter(new \Laminas\Log\Writer\Noop);
+            return $this->logger->addWriter(new \Laminas\Log\Writer\Noop());
         }
     }
 
@@ -180,7 +179,8 @@ class LoggerFactory implements FactoryInterface
      * @return mixed
      * @throws Exception
      */
-    private function getWriterFormatter(array $config) {
+    private function getWriterFormatter(array $config)
+    {
         $class = $config['options']['formatter']['name'];
 
         if (class_exists($class)) {

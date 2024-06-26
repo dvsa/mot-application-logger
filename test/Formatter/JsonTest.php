@@ -29,7 +29,7 @@ class JsonTest extends TestCase
         'stacktrace',
     ];
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new Json();
     }
@@ -75,20 +75,20 @@ class JsonTest extends TestCase
         ];
 
         $expectedString = "{\"priority\":\"$expectedPriority\","
-            ."\"priorityName\":\"$expectedPriorityName\","
-            ."\"level\":\"$expectedLevel\","
-            ."\"message\":\"$expectedMessage\","
-            ."\"callerName\":\"$errorLocation\","
-            ."\"logger_name\":\"$errorLocation\","
-            ."\"logEntryType\":\"$expectedLogEntryType\","
-            ."\"microtimeTimestamp\":\"\","
-            ."\"timestamp\":\"\","
-            ."\"username\":\"$expectedUsername\","
-            ."\"token\":\"$expectedToken\","
-            ."\"errorCode\":\"$expectedExceptionCode\","
-            ."\"exceptionType\":\"$expectedExceptionType\","
-            ."\"stacktrace\":\"$expectedStackTrace\","
-            ."\"extra\":\"{\\\"foo\\\":\\\"bar\\\"}\"}";
+            . "\"priorityName\":\"$expectedPriorityName\","
+            . "\"level\":\"$expectedLevel\","
+            . "\"message\":\"$expectedMessage\","
+            . "\"callerName\":\"$errorLocation\","
+            . "\"logger_name\":\"$errorLocation\","
+            . "\"logEntryType\":\"$expectedLogEntryType\","
+            . "\"microtimeTimestamp\":\"\","
+            . "\"timestamp\":\"\","
+            . "\"username\":\"$expectedUsername\","
+            . "\"token\":\"$expectedToken\","
+            . "\"errorCode\":\"$expectedExceptionCode\","
+            . "\"exceptionType\":\"$expectedExceptionType\","
+            . "\"stacktrace\":\"$expectedStackTrace\","
+            . "\"extra\":\"{\\\"foo\\\":\\\"bar\\\"}\"}";
 
         $expectedJson = json_decode($expectedString, true);
         $outputJson = json_decode($this->formatter->format($event), true);

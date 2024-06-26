@@ -104,7 +104,7 @@ class Logger extends LaminasLogger
     /**
      * @return string
      */
-    public function getParentSpanId() : string
+    public function getParentSpanId(): string
     {
         return $this->parentSpanId;
     }
@@ -122,7 +122,7 @@ class Logger extends LaminasLogger
     /**
      * @return string
      */
-    public function getSpanId() : string
+    public function getSpanId(): string
     {
         return $this->spanId;
     }
@@ -185,17 +185,16 @@ class Logger extends LaminasLogger
      */
     protected function getCallerName($exception = null)
     {
-        if (!is_null($exception) && isset($exception->getTrace()[0]))
-        {
+        if (!is_null($exception) && isset($exception->getTrace()[0])) {
             return $this->formatTraceCaller($exception->getTrace()[0]);
         }
 
         $trace = debug_backtrace();
         if (isset($trace[3]) && isset($trace[3]['class']) && strpos($trace[3]['class'], $this->parentCallingItsMethods) === 0) {
-            if (isset($trace[4])){
+            if (isset($trace[4])) {
                 return $this->formatTraceCaller($trace[4]);
             }
-        } else if (isset($trace[2]) && isset($trace[3])) {
+        } elseif (isset($trace[2]) && isset($trace[3])) {
             return $this->formatTraceCaller($trace[3]);
         }
 
@@ -225,14 +224,12 @@ class Logger extends LaminasLogger
 
         if ($exception == null) {
             $invalidValues[] = 'exception';
-        } elseif(!isset($exception->getTrace()[0])) {
+        } elseif (!isset($exception->getTrace()[0])) {
             $invalidValues[] = '$exception->getTrace()[0]';
         }
 
-
         return 'Application logger was not able to log exception, invalid values: '
             . join(', ', $invalidValues);
-
     }
 
     /**
@@ -256,7 +253,7 @@ class Logger extends LaminasLogger
      */
     protected function getMicrosecondsTimestamp($microtime)
     {
-        list($usec, $sec) = explode(" ",$microtime);
+        list($usec, $sec) = explode(" ", $microtime);
         $miliseconds = substr($usec, 2, 6);
         return date('Y-m-d H:i:s', $sec) . '.' . $miliseconds . ' Z';
     }
@@ -268,7 +265,7 @@ class Logger extends LaminasLogger
      */
     protected function getTimestamp($microtime)
     {
-        list($usec, $sec) = explode(" ",$microtime);
+        list($usec, $sec) = explode(" ", $microtime);
         $miliseconds = substr($usec, 2, 3);
         return date("Y-m-d\TH:i:s" . "." . $miliseconds . "P", $sec);
     }

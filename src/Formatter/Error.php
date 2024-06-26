@@ -1,8 +1,6 @@
 <?php
 
-
 namespace DvsaApplicationLogger\Formatter;
-
 
 /**
  * This class will format the log message for any exception being thrown in

@@ -1,4 +1,5 @@
 <?php
+
 return [
     'DvsaApplicationLogger' => [
         'registerExceptionHandler' => true,

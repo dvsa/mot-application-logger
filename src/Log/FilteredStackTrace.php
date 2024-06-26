@@ -16,7 +16,8 @@ class FilteredStackTrace
      * @param \Throwable $throwable
      * @return string
      */
-    public function getTraceAsString(\Throwable $throwable) {
+    public function getTraceAsString(\Throwable $throwable)
+    {
         $trace = $throwable->getTrace();
         $traceString = "";
         $count = 0;
@@ -33,19 +34,20 @@ class FilteredStackTrace
      * @param array $line
      * @return string
      */
-    protected function getTraceLineAsFilteredString($count, $line) {
+    protected function getTraceLineAsFilteredString($count, $line)
+    {
 
         $currentFile = isset($line['file']) ? $line['file'] : "[internal function]";
         $currentLine = isset($line['line']) ? $line['line'] : "";
         $className = isset($line['class']) ? $line['class'] : null;
         $function = isset($line['function']) ? $line['function'] : "";
-        $fullyQualifiedFunction = $className != null ? $className."->".$function : $function;
+        $fullyQualifiedFunction = $className != null ? $className . "->" . $function : $function;
 
         $canGetArgumentNames = true;
         $argumentNames = [];
         try {
             $argumentNames = $this->getArgumentNames($function, $className);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             $canGetArgumentNames  = false;
         }
 
@@ -55,12 +57,14 @@ class FilteredStackTrace
             $argumentsString = $this->getArguments($line['args'], $argumentNames, $canGetArgumentNames);
         }
 
-        return sprintf("#%s %s(%s): %s(%s)\n",
+        return sprintf(
+            "#%s %s(%s): %s(%s)\n",
             $count,
             $currentFile,
             $currentLine,
             $fullyQualifiedFunction,
-            $argumentsString);
+            $argumentsString
+        );
     }
 
     /**
@@ -94,15 +98,15 @@ class FilteredStackTrace
      * @param bool $canGetArgumentNames Whether the argument names could be obtained by reflection.
      * @return string
      */
-    protected function getArguments($argumentValues, $argumentNames, $canGetArgumentNames) {
+    protected function getArguments($argumentValues, $argumentNames, $canGetArgumentNames)
+    {
         $argumentStrings = [];
         $argumentsCount = 0;
         foreach ($argumentValues as $argumentValue) {
             if (is_string($argumentValue)) {
                 if ($canGetArgumentNames && isset($argumentNames[$argumentsCount])) {
                     $value = $this->filterArgument($argumentNames[$argumentsCount], $argumentValue);
-                }
-                else {
+                } else {
                     // Argument name could not be determined (reflection failed), so hide values.
                     $value = "'######'";
                 }
@@ -123,7 +127,7 @@ class FilteredStackTrace
             $argumentStrings[] = isset($argumentNames[$argumentsCount]) ? $argumentNames[$argumentsCount] . '=' . $value : $value;
             $argumentsCount++;
         }
-        return join(", ",  $argumentStrings);
+        return join(", ", $argumentStrings);
     }
 
     /**
@@ -132,12 +136,11 @@ class FilteredStackTrace
      * @param $value
      * @return string
      */
-    protected function filterArgument($argumentName, $value) {
+    protected function filterArgument($argumentName, $value)
+    {
         if (preg_match(self::TRACE_EXCLUSIONS, $argumentName)) {
             return "'******'";
         }
         return "'$value'";
     }
-
-
 }
