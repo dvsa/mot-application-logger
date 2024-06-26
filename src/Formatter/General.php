@@ -72,7 +72,7 @@ class General extends Base
      * Format the event into a message string.
      *
      * @param array $event
-     * @return array|mixed|string
+     * @return string
      */
     public function format($event)
     {
