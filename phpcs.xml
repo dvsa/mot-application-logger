@@ -6,5 +6,5 @@
 
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <rule ref="./vendor-bin/php-codesniffer/vendor/dvsa/coding-standards/src/Profiles/DVSA/CS/ruleset.xml" />
+    <rule ref="./vendor/dvsa/coding-standards/src/Profiles/DVSA/CS/ruleset.xml" />
 </ruleset>
