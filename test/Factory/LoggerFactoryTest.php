@@ -2,7 +2,7 @@
 
 namespace DvsaApplicationLoggerTest\Factory;
 
-use AccountApi\Service\TokenService;
+use DvsaApplicationLogger\TokenService\TokenServiceInterface;
 use DvsaApplicationLogger\Factory\LoggerFactory;
 use DvsaApplicationLogger\Helper\SapiHelper;
 use DvsaApplicationLogger\Log\SystemLogLogger;
@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 class LoggerFactoryTest extends TestCase
 {
-    public function testExceptionIsThrownIfNoConfigIsProvided()
+    public function testExceptionIsThrownIfNoConfigIsProvided(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('A DvsaApplicationLogger config can not be loaded.');
@@ -35,11 +35,11 @@ class LoggerFactoryTest extends TestCase
      * Checks if factory creates apropriate logger service. When app is invoked from CLI, logger should output
      * everything back to the user instead of only logging it
      * @dataProvider loggerInstancesDataProvider
-     * @param $loggerClass class name of created service
+     * @param class-string $loggerClass class name of created service
      * @param $requestObject Request object
      * @throws \Exception
      */
-    public function testLoggerCreatedInstanceOfLogger($isConsoleRequest, $loggerClass)
+    public function testLoggerCreatedInstanceOfLogger(bool $isConsoleRequest, $loggerClass): void
     {
         $systemLogLogger = $this->getMockBuilder(SystemLogLogger::class)
             ->disableOriginalConstructor()
@@ -59,7 +59,7 @@ class LoggerFactoryTest extends TestCase
                 $map = array(
                     'Config' => ['DvsaApplicationLogger' => []],
                     SapiHelper::class => $mockSapiHelper,
-                    'tokenService' => $this->getMockBuilder(TokenService::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                    'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,
                     'MotIdentityProvider' => null

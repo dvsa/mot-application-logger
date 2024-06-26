@@ -14,8 +14,11 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $name, array $options = null)
     {
+        /** @var array */
+        $config = $container->get('Config');
+
         return new ReplaceTraceArgsProcessor(
-            $this->createDatabaseCredentialsMasking($container->get('Config'))
+            $this->createDatabaseCredentialsMasking($config)
         );
     }
 

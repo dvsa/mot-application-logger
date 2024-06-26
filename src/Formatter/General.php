@@ -11,8 +11,8 @@ use Laminas\Log\Formatter\Base;
  */
 class General extends Base
 {
-    protected $logFieldDelimiter = '||';
-    protected $logEntryPrefix = '^^*';
+    protected string $logFieldDelimiter = '||';
+    protected string $logEntryPrefix = '^^*';
 
     /**
      * @var array

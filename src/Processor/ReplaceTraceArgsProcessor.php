@@ -16,7 +16,7 @@ class ReplaceTraceArgsProcessor implements ProcessorInterface
      */
     private $replaceTo;
 
-    public function __construct($replaceMap)
+    public function __construct(array $replaceMap)
     {
         $this->replaceFrom = array_keys($replaceMap);
         $this->replaceTo = array_values($replaceMap);

@@ -136,7 +136,7 @@ class FilteredStackTrace
      * @param $value
      * @return string
      */
-    protected function filterArgument($argumentName, $value)
+    protected function filterArgument(string $argumentName, string $value)
     {
         if (preg_match(self::TRACE_EXCLUSIONS, $argumentName)) {
             return "'******'";

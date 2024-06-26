@@ -4,9 +4,11 @@ namespace DvsaApplicationLogger\Listener;
 
 use Laminas\EventManager\ListenerAggregateInterface;
 use Laminas\EventManager\EventManagerInterface;
-use Laminas\EventManager\EventInterface;
+use Laminas\Log\Writer\WriterInterface;
 use Laminas\Log\Logger as Log;
 use Laminas\Mvc\MvcEvent;
+use Laminas\Http\PhpEnvironment\Request;
+use Laminas\Http\PhpEnvironment\Response as PhpResponse;
 
 /**
  * Class Request
@@ -108,25 +110,29 @@ class Response implements ListenerAggregateInterface
     public function detach(EventManagerInterface $events)
     {
         foreach ($this->getListeners() as $index => $listener) {
-            if ($events->detach($listener)) {
-                $this->removeListener($index);
-            }
+            $events->detach($listener);
+            $this->removeListener($index);
         }
     }
 
     /**
      * @param MvcEvent $event
      */
-    public function logResponse(MvcEvent $event)
+    public function logResponse(MvcEvent $event): void
     {
         if ($event->getRequest() instanceof \Laminas\Http\PhpEnvironment\Request) {
+            /** @var Request */
+            $request = $event->getRequest();
+            /** @var PhpResponse */
+            $response = $event->getResponse();
+
             $this->getLog()->debug(
                 print_r(
                     array(
-                        $event->getRequest()->getUri()->getHost() => array(
+                        $request->getUri()->getHost() => array(
                             'Response' => array(
-                                'statusCode' => $event->getResponse()->getStatusCode(),
-                                'content'    => $event->getResponse()->getContent()
+                                'statusCode' => $response->getStatusCode(),
+                                'content'    => $response->getContent()
                             )
                         )
                     ),
@@ -136,11 +142,9 @@ class Response implements ListenerAggregateInterface
         }
     }
 
-    /**
-     * @param EventInterface $event
-     */
-    public function shutdown(EventInterface $event)
+    public function shutdown(): void
     {
+        /** @var WriterInterface */
         foreach ($this->getLog()->getWriters() as $writer) {
             $writer->shutdown();
         }

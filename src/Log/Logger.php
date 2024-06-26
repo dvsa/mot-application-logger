@@ -5,6 +5,7 @@ namespace DvsaApplicationLogger\Log;
 use Exception;
 use Interop\Container\ContainerInterface;
 use Laminas\Log\Logger as LaminasLogger;
+use DvsaApplicationLogger\Interfaces\MotIdentityProviderInterface;
 
 /**
  * This is a bespoke logger class for the DVSA MOT project. It tracks
@@ -53,12 +54,6 @@ class Logger extends LaminasLogger
     private $logEntryType = 'General';
 
     /**
-     * @deprecated
-     * @var Exception
-     */
-    private $exception;
-
-    /**
      * @var SystemLogLogger
      */
     private $errorLogLogger;
@@ -79,15 +74,14 @@ class Logger extends LaminasLogger
      * @param Exception $exception
      * @codeCoverageIgnore
      */
-    public function setException(Exception $exception)
+    public function setException(Exception $exception): void
     {
-        $this->exception = $exception;
     }
 
     /**
      * @param string $traceId
      */
-    public function setTraceId($traceId)
+    public function setTraceId($traceId): void
     {
         $this->traceId = $traceId;
     }
@@ -145,7 +139,7 @@ class Logger extends LaminasLogger
     /**
      * @param string $logEntryType
      */
-    public function setLogEntryType($logEntryType)
+    public function setLogEntryType($logEntryType): void
     {
         $this->logEntryType = $logEntryType;
     }
@@ -180,7 +174,7 @@ class Logger extends LaminasLogger
 
     /**
      * Return the calling function name
-     * @param null $exception if exception is null it tries to get caller from debug_backtrace()
+     * @param \Throwable|null $exception if exception is null it tries to get caller from debug_backtrace()
      * @return string
      */
     protected function getCallerName($exception = null)
@@ -201,8 +195,11 @@ class Logger extends LaminasLogger
         return $this->reasonForNotBeingAbleToLogException($exception, $trace);
     }
 
-
-    private function reasonForNotBeingAbleToLogException($exception, $trace)
+    /**
+     * @param \Throwable|null $exception
+     * @param array $trace
+     */
+    private function reasonForNotBeingAbleToLogException($exception, $trace): string
     {
         $invalidValues = [];
 
@@ -255,7 +252,7 @@ class Logger extends LaminasLogger
     {
         list($usec, $sec) = explode(" ", $microtime);
         $miliseconds = substr($usec, 2, 6);
-        return date('Y-m-d H:i:s', $sec) . '.' . $miliseconds . ' Z';
+        return date('Y-m-d H:i:s', (int)$sec) . '.' . $miliseconds . ' Z';
     }
 
     /**
@@ -266,8 +263,8 @@ class Logger extends LaminasLogger
     protected function getTimestamp($microtime)
     {
         list($usec, $sec) = explode(" ", $microtime);
-        $miliseconds = substr($usec, 2, 3);
-        return date("Y-m-d\TH:i:s" . "." . $miliseconds . "P", $sec);
+        $milliseconds = substr($usec, 2, 3);
+        return date("Y-m-d\TH:i:s" . "." . $milliseconds . "P", (int)$sec);
     }
 
     /**
@@ -277,7 +274,7 @@ class Logger extends LaminasLogger
      *
      * @return array
      */
-    protected function getBasicMetadata($priority)
+    protected function getBasicMetadata(int $priority)
     {
         return [
             'username' => $this->getUuid(),
@@ -318,7 +315,9 @@ class Logger extends LaminasLogger
     protected function getUuid()
     {
         try {
-            $identity = $this->serviceLocator->get('MotIdentityProvider')->getIdentity();
+            /** @var MotIdentityProviderInterface */
+            $motIdentityProvider = $this->serviceLocator->get('MotIdentityProvider');
+            $identity = $motIdentityProvider->getIdentity();
             return !is_null($identity) ? $identity->getUuid() : "";
         } catch (Exception $e) {
             $this->errorLogLogger->recursivelyLogExceptionToSystemLog($e);

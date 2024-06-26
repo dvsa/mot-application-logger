@@ -10,5 +10,5 @@ namespace DvsaApplicationLogger\TokenService;
  */
 interface TokenServiceInterface
 {
-    public function getToken();
+    public function getToken(): null|string;
 }

@@ -11,7 +11,7 @@ class JsonTest extends TestCase
      */
     protected $formatter;
 
-    protected $formatterFields = [
+    protected array $formatterFields = [
         'microtimeTimestamp',
         'timestamp',
         'priority',
@@ -40,7 +40,7 @@ class JsonTest extends TestCase
      *
      * @throws \Exception
      */
-    public function testOutputFormatContainsRelevantProperties()
+    public function testOutputFormatContainsRelevantProperties(): void
     {
         $expectedPriority = 7;
         $expectedPriorityName = 'DEBUG';
@@ -91,6 +91,7 @@ class JsonTest extends TestCase
             . "\"extra\":\"{\\\"foo\\\":\\\"bar\\\"}\"}";
 
         $expectedJson = json_decode($expectedString, true);
+        /** @var array */
         $outputJson = json_decode($this->formatter->format($event), true);
 
         foreach ($this->formatterFields as $field) {

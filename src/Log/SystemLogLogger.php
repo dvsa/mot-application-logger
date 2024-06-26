@@ -30,7 +30,7 @@ class SystemLogLogger
      * Logs exception stack to system log using error_log()
      * @param Exception $exception
      */
-    public function recursivelyLogExceptionToSystemLog($exception)
+    public function recursivelyLogExceptionToSystemLog($exception): void
     {
         do {
             $trace = $this->maskExceptionTrace((new FilteredStackTrace())->getTraceAsString($exception));
@@ -42,7 +42,7 @@ class SystemLogLogger
 
     /**
      * @param string $exceptionTrace
-     * @return array
+     * @return string
      */
     private function maskExceptionTrace($exceptionTrace)
     {

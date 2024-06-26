@@ -36,7 +36,7 @@ class Request implements ListenerAggregateInterface
     }
 
     /**
-     * @return array
+     * @return Log
      */
     public function getLog()
     {
@@ -107,16 +107,15 @@ class Request implements ListenerAggregateInterface
     public function detach(EventManagerInterface $events)
     {
         foreach ($this->getListeners() as $index => $listener) {
-            if ($events->detach($listener)) {
-                $this->removeListener($index);
-            }
+            $events->detach($listener);
+            $this->removeListener($index);
         }
     }
 
     /**
-     * @param EventInterface $event
+     * @param MvcEvent $event
      */
-    public function logRequest(MvcEvent $event)
+    public function logRequest(MvcEvent $event): void
     {
         if ($event->getRequest() instanceof \Laminas\Http\PhpEnvironment\Request) {
             $this->getLog()->debug(

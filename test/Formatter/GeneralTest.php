@@ -2,14 +2,11 @@
 
 namespace DvsaApplicationLoggerTest\Formatter;
 
-use DvsaApplicationLogger\Factory\LoggerFactory;
 use DvsaApplicationLogger\Formatter\General;
-use DvsaApplicationLogger\Log\Logger;
-use Laminas\Stdlib\SplPriorityQueue;
 
 class GeneralTest extends TestCase
 {
-    protected $formatterFields = [
+    protected array $formatterFields = [
         'microtimeTimestamp' => '',
         'priority' => '',
         'priorityName' => '',
@@ -40,7 +37,7 @@ class GeneralTest extends TestCase
      * @param array $event
      * @param string $expectedOutput
      */
-    public function testOutputFormat($event, $expectedOutput)
+    public function testOutputFormat($event, $expectedOutput): void
     {
         $this->assertEquals($expectedOutput, $this->formatter->format($event));
     }
@@ -48,7 +45,7 @@ class GeneralTest extends TestCase
     /**
      * Extra data should be encoded to a json string
      */
-    public function testExtraGetsEncodedToJson()
+    public function testExtraGetsEncodedToJson(): void
     {
         $extraData = [
             'foo' => 'bar',
@@ -59,7 +56,9 @@ class GeneralTest extends TestCase
             ]
         ];
 
+        /** @var string */
         $expectedString = json_encode(['foo' => 'bar', 'encode' => true]);
+        /** @var string */
         $output = $this->formatter->format(['extra' => $extraData]);
 
         $this->assertStringEndsWith($expectedString, $output);
@@ -69,7 +68,7 @@ class GeneralTest extends TestCase
      * This will test the log message in its full format. See
      * https://wiki.i-env.net/display/EA/Logging+Formats for requirements
      */
-    public function testExpectedLogMessageInFullFormat()
+    public function testExpectedLogMessageInFullFormat(): void
     {
         $expectedPriority = 7;
         $expectedPriorityName = 'DEBUG';
@@ -119,15 +118,9 @@ class GeneralTest extends TestCase
             ]
         );
 
-        $this->assertStringEndsWith($expectedString, $this->formatter->format($event));
-    }
+        /** @var string */
+        $actual = $this->formatter->format($event);
 
-    private static function flattenTime($time)
-    {
-        $flatTime = '';
-        foreach ($time as $key => $value) {
-            $flatTime = $flatTime . $value;
-        }
-        return $flatTime;
+        $this->assertStringEndsWith($expectedString, $actual);
     }
 }
