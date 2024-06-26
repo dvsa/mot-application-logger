@@ -2,7 +2,6 @@
 
 namespace DvsaApplicationLoggerTest\Logger;
 
-use AccountApi\Service\TokenService;
 use DvsaApplicationLogger\Factory\LoggerFactory;
 use DvsaApplicationLogger\Helper\SapiHelper;
 use DvsaApplicationLogger\Interfaces\MotIdentityInterface;
@@ -12,12 +11,10 @@ use DvsaApplicationLogger\Log\SystemLogLogger;
 use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
 use DvsaApplicationLogger\Log\FilteredStackTrace;
 use DvsaApplicationLogger\TokenService\TokenServiceInterface;
-use DvsaCommon\Auth\MotIdentity;
-use DvsaCommon\Auth\MotIdentityProvider;
 use Laminas\Stdlib\SplPriorityQueue;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
-use Laminas\Log\Writer\WriterInterface;
+use Laminas\Log\Writer\Mock;
 
 class LoggerTest extends TestCase
 {
@@ -37,7 +34,7 @@ class LoggerTest extends TestCase
         $logger->log($logger::CRIT, $message, ['ex' => $exception]);
         $logger->log($logger::NOTICE, $message);
         $logger->log($logger::ALERT, $message);
-        /** @var WriterInterface */
+        /** @var Mock */
         $writer = $logger->getWriters()->toArray()[0];
 
         $this->assertEquals(Logger::ERROR_LOG_LEVEL, $writer->events[1]['extra']['__dvsa_metadata__']['level']);
@@ -79,6 +76,7 @@ class LoggerTest extends TestCase
 
         $logger->debug($message, ['ex' => $exception]);
 
+        /** @var Mock */
         $writer = $logger->getWriters()->toArray()[0];
         $this->assertBasicMetadataArePresent($writer->events[0]);
     }
@@ -135,16 +133,17 @@ class LoggerTest extends TestCase
              }));
 
         $factory = new LoggerFactory();
-        /** @var \DvsaApplicationLogger\Log\Logger $loggerConsole */
+        /** @var Logger */
         $loggerConsole = $factory($consoleMock, null, []);
+        /** @var Logger */
         $loggerHttp = $factory($httpMock, null, []);
 
         $writers = new SplPriorityQueue();
-        $writers->insert(new \Laminas\Log\Writer\Mock(), 0);
+        $writers->insert(new Mock(), 0);
         $loggerConsole->setWriters($writers);
 
         $writers = new SplPriorityQueue();
-        $writers->insert(new \Laminas\Log\Writer\Mock(), 0);
+        $writers->insert(new Mock(), 0);
         $loggerHttp->setWriters($writers);
 
         return [
@@ -195,6 +194,7 @@ class LoggerTest extends TestCase
              }));
 
         $factory = new LoggerFactory();
+        /** @var Logger */
         $loggerHttp = $factory($httpMock, null, []);
 
         $writers = new SplPriorityQueue();
