@@ -38,6 +38,7 @@ class Json extends General
      *
      * @param array $event containing event data.
      *
+     * @psalm-suppress ImplementedReturnTypeMismatch
      * @return string
      *
      * @throws Exception
