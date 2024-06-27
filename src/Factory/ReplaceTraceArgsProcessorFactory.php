@@ -42,7 +42,7 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
 
             $doctrineConnectionParams = $config["doctrine"]["connection"]["orm_default"]["params"];
 
-            if (!empty($argsToMask)) {
+            if (!is_null($argsToMask) && !empty($argsToMask)) {
                 foreach ($argsToMask as $arg) {
                     $replaceMap[$doctrineConnectionParams[$arg]] = $mask;
                 }
