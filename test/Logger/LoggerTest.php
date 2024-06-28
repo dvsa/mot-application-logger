@@ -14,7 +14,7 @@ use DvsaApplicationLogger\TokenService\TokenServiceInterface;
 use Laminas\Stdlib\SplPriorityQueue;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
-use Laminas\Log\Writer\Mock;
+use Laminas\Log\Writer\Mock as WriterMock;
 
 class LoggerTest extends TestCase
 {
@@ -34,7 +34,7 @@ class LoggerTest extends TestCase
         $logger->log($logger::CRIT, $message, ['ex' => $exception]);
         $logger->log($logger::NOTICE, $message);
         $logger->log($logger::ALERT, $message);
-        /** @var Mock */
+        /** @var WriterMock */
         $writer = $logger->getWriters()->toArray()[0];
 
         $this->assertEquals(Logger::ERROR_LOG_LEVEL, $writer->events[1]['extra']['__dvsa_metadata__']['level']);
@@ -76,7 +76,7 @@ class LoggerTest extends TestCase
 
         $logger->debug($message, ['ex' => $exception]);
 
-        /** @var Mock */
+        /** @var WriterMock */
         $writer = $logger->getWriters()->toArray()[0];
         $this->assertBasicMetadataArePresent($writer->events[0]);
     }
@@ -139,11 +139,11 @@ class LoggerTest extends TestCase
         $loggerHttp = $factory($httpMock, null, []);
 
         $writers = new SplPriorityQueue();
-        $writers->insert(new Mock(), 0);
+        $writers->insert(new WriterMock(), 0);
         $loggerConsole->setWriters($writers);
 
         $writers = new SplPriorityQueue();
-        $writers->insert(new Mock(), 0);
+        $writers->insert(new WriterMock(), 0);
         $loggerHttp->setWriters($writers);
 
         return [
