@@ -72,10 +72,13 @@ class General extends Base
      * Format the event into a message string.
      *
      * @param array $event
-     * @psalm-suppress ImplementedReturnTypeMismatch
+     *
      * @return string
+     *
+     * @psalm-suppress ImplementedReturnTypeMismatch
+     * @phpstan-ignore method.childReturnType
      */
-    public function format($event) // @phpstan-ignore-line
+    public function format($event)
     {
         $data = $this->getEventData($event);
 
