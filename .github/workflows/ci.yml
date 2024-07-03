@@ -24,7 +24,7 @@ jobs:
   test:
     uses: dvsa/.github/.github/workflows/php-tests.yml@v4.1.0
     with:
-      php-versions: "[\"8.0\", \"8.2\"]"
+      php-versions: "[\"8.2\"]"
       composer-version: 'v2.2.24'
 
   security:
