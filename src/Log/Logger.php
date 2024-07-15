@@ -5,6 +5,8 @@ namespace DvsaApplicationLogger\Log;
 use Exception;
 use Interop\Container\ContainerInterface;
 use Laminas\Log\Logger as LaminasLogger;
+use DvsaApplicationLogger\Interfaces\MotIdentityProviderInterface;
+use Traversable;
 
 /**
  * This is a bespoke logger class for the DVSA MOT project. It tracks
@@ -12,17 +14,19 @@ use Laminas\Log\Logger as LaminasLogger;
  * when an exception is thrown.
  *
  * @package DvsaApplicationLogger\Log
+ *
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 class Logger extends LaminasLogger
 {
-    const ZEND_LOGGER_CRIT_LOG_LEVEL = 'CRIT';
-    const ZEND_LOGGER_EMERG_LOG_LEVEL = 'EMERG';
-    const ZEND_LOGGER_ERROR_LOG_LEVEL = 'ERR';
-    const ERROR_LOG_LEVEL = 'ERROR';
-    const ZEND_LOGGER_NOTICE_LOG_LEVEL = 'NOTICE';
-    const INFO_LOG_LEVEL = 'INFO';
-    const ZEND_LOGGER_ALERT_LOG_LEVEL = 'ALERT';
-    const WARN_LOG_LEVEL = 'WARN';
+    public const ERROR_LOG_LEVEL = 'ERROR';
+    public const INFO_LOG_LEVEL = 'INFO';
+    public const WARN_LOG_LEVEL = 'WARN';
+    private const ZEND_LOGGER_CRIT_LOG_LEVEL = 'CRIT';
+    private const ZEND_LOGGER_EMERG_LOG_LEVEL = 'EMERG';
+    private const ZEND_LOGGER_ERROR_LOG_LEVEL = 'ERR';
+    private const ZEND_LOGGER_NOTICE_LOG_LEVEL = 'NOTICE';
+    private const ZEND_LOGGER_ALERT_LOG_LEVEL = 'ALERT';
 
     /**
      * Used to check if log method is invoked from Laminas\Log\Logger so the stacktrace is deeper
@@ -53,12 +57,6 @@ class Logger extends LaminasLogger
     private $logEntryType = 'General';
 
     /**
-     * @deprecated
-     * @var Exception
-     */
-    private $exception;
-
-    /**
      * @var SystemLogLogger
      */
     private $errorLogLogger;
@@ -66,7 +64,7 @@ class Logger extends LaminasLogger
     /** @var ContainerInterface */
     private $serviceLocator;
 
-    public function __construct($options, SystemLogLogger $systemLogLogger, ContainerInterface $serviceLocator)
+    public function __construct(array $options, SystemLogLogger $systemLogLogger, ContainerInterface $serviceLocator)
     {
         $this->serviceLocator = $serviceLocator;
         $this->errorLogLogger = $systemLogLogger;
@@ -79,15 +77,14 @@ class Logger extends LaminasLogger
      * @param Exception $exception
      * @codeCoverageIgnore
      */
-    public function setException(Exception $exception)
+    public function setException(Exception $exception): void
     {
-        $this->exception = $exception;
     }
 
     /**
      * @param string $traceId
      */
-    public function setTraceId($traceId)
+    public function setTraceId($traceId): void
     {
         $this->traceId = $traceId;
     }
@@ -104,7 +101,7 @@ class Logger extends LaminasLogger
     /**
      * @return string
      */
-    public function getParentSpanId() : string
+    public function getParentSpanId(): string
     {
         return $this->parentSpanId;
     }
@@ -122,7 +119,7 @@ class Logger extends LaminasLogger
     /**
      * @return string
      */
-    public function getSpanId() : string
+    public function getSpanId(): string
     {
         return $this->spanId;
     }
@@ -145,7 +142,7 @@ class Logger extends LaminasLogger
     /**
      * @param string $logEntryType
      */
-    public function setLogEntryType($logEntryType)
+    public function setLogEntryType($logEntryType): void
     {
         $this->logEntryType = $logEntryType;
     }
@@ -159,19 +156,21 @@ class Logger extends LaminasLogger
      *
      * @param int $priority
      * @param mixed $message
-     * @param array $extra
+     * @param array|Traversable $extra
      * @return $this
      */
     public function log($priority, $message, $extra = [])
     {
         $metadata = $this->getBasicMetadata($priority);
 
-        if (isset($extra['ex']) && $extra['ex'] instanceof \Throwable) {
-            $metadata += $this->getExceptionMetadata($extra['ex']);
-            unset($extra['ex']);
-        }
+        if (is_array($extra)) {
+            if (isset($extra['ex']) && $extra['ex'] instanceof \Throwable) {
+                $metadata += $this->getExceptionMetadata($extra['ex']);
+                unset($extra['ex']);
+            }
 
-        $extra['__dvsa_metadata__'] = $metadata;
+            $extra['__dvsa_metadata__'] = $metadata;
+        }
 
         // I think we're sending mixed messages here
         parent::log($priority, $message, $extra);
@@ -180,30 +179,32 @@ class Logger extends LaminasLogger
 
     /**
      * Return the calling function name
-     * @param null $exception if exception is null it tries to get caller from debug_backtrace()
+     * @param \Throwable|null $exception if exception is null it tries to get caller from debug_backtrace()
      * @return string
      */
     protected function getCallerName($exception = null)
     {
-        if (!is_null($exception) && isset($exception->getTrace()[0]))
-        {
+        if (!is_null($exception) && isset($exception->getTrace()[0])) {
             return $this->formatTraceCaller($exception->getTrace()[0]);
         }
 
         $trace = debug_backtrace();
         if (isset($trace[3]) && isset($trace[3]['class']) && strpos($trace[3]['class'], $this->parentCallingItsMethods) === 0) {
-            if (isset($trace[4])){
+            if (isset($trace[4])) {
                 return $this->formatTraceCaller($trace[4]);
             }
-        } else if (isset($trace[2]) && isset($trace[3])) {
+        } elseif (isset($trace[2]) && isset($trace[3])) {
             return $this->formatTraceCaller($trace[3]);
         }
 
         return $this->reasonForNotBeingAbleToLogException($exception, $trace);
     }
 
-
-    private function reasonForNotBeingAbleToLogException($exception, $trace)
+    /**
+     * @param \Throwable|null $exception
+     * @param array $trace
+     */
+    private function reasonForNotBeingAbleToLogException($exception, $trace): string
     {
         $invalidValues = [];
 
@@ -225,14 +226,12 @@ class Logger extends LaminasLogger
 
         if ($exception == null) {
             $invalidValues[] = 'exception';
-        } elseif(!isset($exception->getTrace()[0])) {
+        } elseif (!isset($exception->getTrace()[0])) {
             $invalidValues[] = '$exception->getTrace()[0]';
         }
 
-
         return 'Application logger was not able to log exception, invalid values: '
             . join(', ', $invalidValues);
-
     }
 
     /**
@@ -256,9 +255,9 @@ class Logger extends LaminasLogger
      */
     protected function getMicrosecondsTimestamp($microtime)
     {
-        list($usec, $sec) = explode(" ",$microtime);
+        list($usec, $sec) = explode(" ", $microtime);
         $miliseconds = substr($usec, 2, 6);
-        return date('Y-m-d H:i:s', $sec) . '.' . $miliseconds . ' Z';
+        return date('Y-m-d H:i:s', (int)$sec) . '.' . $miliseconds . ' Z';
     }
 
     /**
@@ -268,9 +267,9 @@ class Logger extends LaminasLogger
      */
     protected function getTimestamp($microtime)
     {
-        list($usec, $sec) = explode(" ",$microtime);
-        $miliseconds = substr($usec, 2, 3);
-        return date("Y-m-d\TH:i:s" . "." . $miliseconds . "P", $sec);
+        list($usec, $sec) = explode(" ", $microtime);
+        $milliseconds = substr($usec, 2, 3);
+        return date("Y-m-d\TH:i:s" . "." . $milliseconds . "P", (int)$sec);
     }
 
     /**
@@ -280,7 +279,7 @@ class Logger extends LaminasLogger
      *
      * @return array
      */
-    protected function getBasicMetadata($priority)
+    protected function getBasicMetadata(int $priority)
     {
         return [
             'username' => $this->getUuid(),
@@ -321,7 +320,9 @@ class Logger extends LaminasLogger
     protected function getUuid()
     {
         try {
-            $identity = $this->serviceLocator->get('MotIdentityProvider')->getIdentity();
+            /** @var MotIdentityProviderInterface */
+            $motIdentityProvider = $this->serviceLocator->get('MotIdentityProvider');
+            $identity = $motIdentityProvider->getIdentity();
             return !is_null($identity) ? $identity->getUuid() : "";
         } catch (Exception $e) {
             $this->errorLogLogger->recursivelyLogExceptionToSystemLog($e);

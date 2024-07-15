@@ -2,29 +2,29 @@
 
 namespace DvsaApplicationLoggerTest\Logger;
 
-use AccountApi\Service\TokenService;
 use DvsaApplicationLogger\Factory\LoggerFactory;
 use DvsaApplicationLogger\Helper\SapiHelper;
+use DvsaApplicationLogger\Interfaces\MotIdentityInterface;
+use DvsaApplicationLogger\Interfaces\MotIdentityProviderInterface;
 use DvsaApplicationLogger\Log\Logger;
 use DvsaApplicationLogger\Log\SystemLogLogger;
 use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
 use DvsaApplicationLogger\Log\FilteredStackTrace;
-
-use DvsaCommon\Auth\MotIdentity;
-use DvsaCommon\Auth\MotIdentityProvider;
+use DvsaApplicationLogger\TokenService\TokenServiceInterface;
 use Laminas\Stdlib\SplPriorityQueue;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
+use Laminas\Log\Writer\Mock as WriterMock;
 
 class LoggerTest extends TestCase
 {
-    const LOGGER_TIMESTAMP_REGEX = '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}/';
+    private const LOGGER_TIMESTAMP_REGEX = '/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3}/';
 
     /**
      * @dataProvider getLogger
      * @param Logger $logger
      */
-    public function testProperErrorExceptionLogging($logger)
+    public function testProperErrorExceptionLogging($logger): void
     {
         $message = 'logger test message';
         $code = 400;
@@ -34,6 +34,7 @@ class LoggerTest extends TestCase
         $logger->log($logger::CRIT, $message, ['ex' => $exception]);
         $logger->log($logger::NOTICE, $message);
         $logger->log($logger::ALERT, $message);
+        /** @var WriterMock */
         $writer = $logger->getWriters()->toArray()[0];
 
         $this->assertEquals(Logger::ERROR_LOG_LEVEL, $writer->events[1]['extra']['__dvsa_metadata__']['level']);
@@ -67,7 +68,7 @@ class LoggerTest extends TestCase
      * @dataProvider getLoggerWithBrokenUuid
      * @param Logger $logger
      */
-    public function testFallbackErrorLoggerLogsToErrorLog($logger)
+    public function testFallbackErrorLoggerLogsToErrorLog($logger): void
     {
         $message = 'logger test message';
         $code = 400;
@@ -75,11 +76,12 @@ class LoggerTest extends TestCase
 
         $logger->debug($message, ['ex' => $exception]);
 
+        /** @var WriterMock */
         $writer = $logger->getWriters()->toArray()[0];
         $this->assertBasicMetadataArePresent($writer->events[0]);
     }
 
-    public function getLogger()
+    public function getLogger(): array
     {
 
         $httpMock = $this->createMock(ContainerInterface::class);
@@ -88,17 +90,17 @@ class LoggerTest extends TestCase
             ->getMock();
         $replaceTraceProcessor = new ReplaceTraceArgsProcessor(["asd" => "asdasd"]);
 
-        $mockMotIdentity = $this->getMockBuilder(MotIdentity::class)->disableOriginalConstructor()->setMethods(['getUuid'])->getMock();
+        $mockMotIdentity = $this->getMockBuilder(MotIdentityInterface::class)->disableOriginalConstructor()->onlyMethods(['getUsername','getUuid', 'getUserId', 'isPasswordChangeRequired', 'isAccountClaimRequired'])->getMock();
         $mockMotIdentity->expects($this->atLeastOnce())
             ->method('getUuid')
             ->willReturn("");
 
-        $mockIdentityProvider = $this->getMockBuilder(MotIdentityProvider::class)->disableOriginalConstructor()->setMethods(['getIdentity'])->getMock();
+        $mockIdentityProvider = $this->getMockBuilder(MotIdentityProviderInterface::class)->disableOriginalConstructor()->onlyMethods(['getIdentity'])->getMock();
         $mockIdentityProvider->expects($this->atLeastOnce())
             ->method('getIdentity')
             ->willReturn($mockMotIdentity);
 
-        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->setMethods(['requestIsConsole'])->getMock();
+        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->onlyMethods(['requestIsConsole'])->getMock();
         $mockSapiHelper
             ->method('requestIsConsole')
             ->willReturnOnConsecutiveCalls(true, false);
@@ -106,7 +108,7 @@ class LoggerTest extends TestCase
         $consoleMock = $this->createMock(ContainerInterface::class);
         $consoleMock->expects($this->any())
              ->method('get')
-             ->will($this->returnCallback(function ($arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor) {
+             ->will($this->returnCallback(function (mixed $arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor) {
                  $map = [
                      'Config' => ['DvsaApplicationLogger' => []],
                      'MotIdentityProvider' => null,
@@ -118,10 +120,10 @@ class LoggerTest extends TestCase
              }));
         $httpMock->expects($this->any())
              ->method('get')
-             ->will($this->returnCallback(function ($arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor, $mockIdentityProvider) {
+             ->will($this->returnCallback(function (mixed $arg) use ($mockSapiHelper, $systemLogLogger, $replaceTraceProcessor, $mockIdentityProvider) {
                  $map = array(
                      'Config' => ['DvsaApplicationLogger' => []],
-                     'tokenService' => $this->getMockBuilder(TokenService::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                     'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->onlyMethods(['getToken'])->getMock(),
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,
                      'MotIdentityProvider' => $mockIdentityProvider,
@@ -131,16 +133,17 @@ class LoggerTest extends TestCase
              }));
 
         $factory = new LoggerFactory();
-        /** @var \DvsaApplicationLogger\Log\Logger $loggerConsole */
+        /** @var Logger */
         $loggerConsole = $factory($consoleMock, null, []);
+        /** @var Logger */
         $loggerHttp = $factory($httpMock, null, []);
 
         $writers = new SplPriorityQueue();
-        $writers->insert(new \Laminas\Log\Writer\Mock(), 0);
+        $writers->insert(new WriterMock(), 0);
         $loggerConsole->setWriters($writers);
 
         $writers = new SplPriorityQueue();
-        $writers->insert(new \Laminas\Log\Writer\Mock(), 0);
+        $writers->insert(new WriterMock(), 0);
         $loggerHttp->setWriters($writers);
 
         return [
@@ -149,7 +152,7 @@ class LoggerTest extends TestCase
         ];
     }
 
-    public function getLoggerWithBrokenUuid()
+    public function getLoggerWithBrokenUuid(): array
     {
         $isConsoleRequest = false;
 
@@ -161,27 +164,27 @@ class LoggerTest extends TestCase
 
         $replaceTraceProcessor = new ReplaceTraceArgsProcessor(["asd" => "asdasd"]);
 
-        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->setMethods(['requestIsConsole'])->getMock();
+        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->onlyMethods(['requestIsConsole'])->getMock();
         $mockSapiHelper->expects($this->atLeastOnce())
             ->method('requestIsConsole')
             ->willReturn($isConsoleRequest);
 
-        $mockMotIdentity = $this->getMockBuilder(MotIdentity::class)->disableOriginalConstructor()->setMethods(['getUuid'])->getMock();
+        $mockMotIdentity = $this->getMockBuilder(MotIdentityInterface::class)->disableOriginalConstructor()->onlyMethods(['getUsername','getUuid', 'getUserId', 'isPasswordChangeRequired', 'isAccountClaimRequired'])->getMock();
         $mockMotIdentity->expects($this->atLeastOnce())
             ->method('getUuid')
             ->willReturn("");
 
-        $mockIdentityProvider = $this->getMockBuilder(MotIdentityProvider::class)->disableOriginalConstructor()->setMethods(['getIdentity'])->getMock();
+        $mockIdentityProvider = $this->getMockBuilder(MotIdentityProviderInterface::class)->disableOriginalConstructor()->onlyMethods(['getIdentity'])->getMock();
         $mockIdentityProvider->expects($this->atLeastOnce())
             ->method('getIdentity')
             ->willReturn($mockMotIdentity);
 
         $httpMock->expects($this->any())
              ->method('get')
-             ->will($this->returnCallback(function ($arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper, $mockIdentityProvider) {
+             ->will($this->returnCallback(function (mixed $arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper, $mockIdentityProvider) {
                  $map = array(
                      'Config' => ['DvsaApplicationLogger' => []],
-                     'tokenService' => $this->getMockBuilder(TokenService::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                     'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->onlyMethods(['getToken'])->getMock(),
                      SapiHelper::class => $mockSapiHelper,
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,
@@ -191,6 +194,7 @@ class LoggerTest extends TestCase
              }));
 
         $factory = new LoggerFactory();
+        /** @var Logger */
         $loggerHttp = $factory($httpMock, null, []);
 
         $writers = new SplPriorityQueue();
@@ -202,27 +206,27 @@ class LoggerTest extends TestCase
         ];
     }
 
-    protected function assertCallerName($event, $callerName)
+    protected function assertCallerName(array $event, string $callerName): void
     {
         $this->assertEquals($callerName, $event['extra']['__dvsa_metadata__']['callerName']);
     }
 
-    protected function assertStacktrace($event, $trace)
+    protected function assertStacktrace(array $event, string $trace): void
     {
         $this->assertEquals($trace, $event['extra']['__dvsa_metadata__']['stacktrace']);
     }
 
-    protected function assertExceptionCode($event, $code)
+    protected function assertExceptionCode(array $event, int $code): void
     {
         $this->assertEquals($code, $event['extra']['__dvsa_metadata__']['errorCode']);
     }
 
-    protected function assertExceptionName($event, $classname)
+    protected function assertExceptionName(array $event, string $classname): void
     {
         $this->assertEquals($classname, $event['extra']['__dvsa_metadata__']['exceptionType']);
     }
 
-    protected function assertBasicMetadataArePresent($event)
+    protected function assertBasicMetadataArePresent(array $event): void
     {
         $this->assertArrayHasKey('priority', $event);
         $this->assertArrayHasKey('priorityName', $event);
@@ -245,7 +249,7 @@ class LoggerTest extends TestCase
         $this->assertArrayHasKey('level', $event);
     }
 
-    protected function assertExceptionMetadataArePresent($event)
+    protected function assertExceptionMetadataArePresent(array $event): void
     {
         $event = $event['extra']['__dvsa_metadata__'];
         $this->assertArrayHasKey('stacktrace', $event);

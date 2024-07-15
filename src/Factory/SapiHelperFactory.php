@@ -21,10 +21,11 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 /**
  * Class LoggerFactory.
  * @package DvsaApplicationLogger\Factory
+ *
+ * @psalm-suppress MissingConstructor
  */
 class SapiHelperFactory implements FactoryInterface
 {
-
     /**
      * @var SapiHelper $helper
      */
@@ -52,5 +53,4 @@ class SapiHelperFactory implements FactoryInterface
         $this->helper = new SapiHelper();
         return $this->helper;
     }
-
 }

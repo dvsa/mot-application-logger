@@ -1,4 +1,5 @@
 <?php
+
 namespace DvsaApplicationLogger;
 
 use DvsaApplicationLogger\Factory\ErrorLogLoggerFactory;
@@ -16,7 +17,7 @@ use Laminas\ServiceManager\Exception\ServiceNotCreatedException;
 
 class Module
 {
-    const FULL_STACK_LOGGING_SERVICE_NAME = 'DvsaCommon\FullStackLogging\Service\FullStackLoggingService';
+    private const FULL_STACK_LOGGING_SERVICE_NAME = 'DvsaCommon\FullStackLogging\Service\FullStackLoggingService';
 
     public function getConfig()
     {
@@ -69,12 +70,14 @@ class Module
     protected function processException(MvcEvent $e)
     {
         $exception = $e->getParam('exception');
-        if (!$exception) return;
+        if (!$exception) {
+            return;
+        }
 
-        if(
+        if (
             is_a($exception, 'DvsaCommon\Exception\UnauthorisedException') ||
             is_a($exception, 'DvsaCommon\HttpRestJson\Exception\ForbiddenOrUnauthorisedException')
-        ){
+        ) {
             return;
         }
 
@@ -98,7 +101,6 @@ class Module
         }
 
         $logger->crit($exception->getMessage(), ['ex' => $exception]);
-
     }
 
     /**

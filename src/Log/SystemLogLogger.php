@@ -21,8 +21,7 @@ class SystemLogLogger
     public function __construct(
         ErrorLogWriter $errorLogWriter,
         ReplaceTraceArgsProcessor $replaceTraceArgsProcessor
-    )
-    {
+    ) {
         $this->errorLogWriter = $errorLogWriter;
         $this->replaceTraceArgsProcessor = $replaceTraceArgsProcessor;
     }
@@ -31,10 +30,10 @@ class SystemLogLogger
      * Logs exception stack to system log using error_log()
      * @param Exception $exception
      */
-    public function recursivelyLogExceptionToSystemLog($exception)
+    public function recursivelyLogExceptionToSystemLog($exception): void
     {
         do {
-            $trace = $this->maskExceptionTrace( (new FilteredStackTrace())->getTraceAsString($exception));
+            $trace = $this->maskExceptionTrace((new FilteredStackTrace())->getTraceAsString($exception));
             $this->errorLogWriter->log($exception->getMessage(), $trace);
             $exception = $exception->getPrevious();
         } while ($exception);
@@ -43,9 +42,9 @@ class SystemLogLogger
 
     /**
      * @param string $exceptionTrace
-     * @return array
+     * @return string
      */
-    private  function maskExceptionTrace($exceptionTrace)
+    private function maskExceptionTrace($exceptionTrace)
     {
         $event = $this->replaceTraceArgsProcessor->process([
             "priority" => Logger::ERR,

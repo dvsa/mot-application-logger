@@ -2,20 +2,23 @@
 
 namespace DvsaApplicationLoggerTest\Formatter;
 
+use DvsaApplicationLogger\Formatter\General;
+use DvsaApplicationLogger\Formatter\Error;
+use DvsaApplicationLogger\Formatter\Json;
 
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @var Error
+     * @var General|Error|Json
      */
     protected $formatter;
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new General();
     }
 
-    protected $formatterFields = [];
+    protected array $formatterFields = [];
 
     /**
      * Generates log event params for formatter and expected output. For each field from log format
@@ -38,7 +41,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return $out;
     }
 
-    public function generateExpectedFormatterInputOutput($dvsa_metadata, $eventStructure)
+    public function generateExpectedFormatterInputOutput(array $dvsa_metadata, array $eventStructure): array
     {
         $fieldCount = count($dvsa_metadata);
         $output = [];

@@ -38,6 +38,7 @@ class Json extends General
      *
      * @param array $event containing event data.
      *
+     * @psalm-suppress ImplementedReturnTypeMismatch
      * @return string
      *
      * @throws Exception
@@ -45,13 +46,12 @@ class Json extends General
     public function format($event)
     {
         $data = $this->getEventData($event);
+        $encoded = json_encode($data);
 
-        try {
-            $encoded = json_encode($data);
-            return $encoded;
-        } catch (Exception $exception) {
-            throw new Exception("Failed to format event as JSON string. Stacktrace: "
-                . $exception->getMessage());
+        if ($encoded === false) {
+            throw new Exception("Failed to format event as JSON string.");
         }
+
+        return $encoded;
     }
 }

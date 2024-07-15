@@ -2,7 +2,7 @@
 
 namespace DvsaApplicationLoggerTest\Factory;
 
-use AccountApi\Service\TokenService;
+use DvsaApplicationLogger\TokenService\TokenServiceInterface;
 use DvsaApplicationLogger\Factory\LoggerFactory;
 use DvsaApplicationLogger\Helper\SapiHelper;
 use DvsaApplicationLogger\Log\SystemLogLogger;
@@ -10,10 +10,9 @@ use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
 use Interop\Container\ContainerInterface;
 use PHPUnit\Framework\TestCase;
 
-
 class LoggerFactoryTest extends TestCase
 {
-    public function testExceptionIsThrownIfNoConfigIsProvided()
+    public function testExceptionIsThrownIfNoConfigIsProvided(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('A DvsaApplicationLogger config can not be loaded.');
@@ -21,7 +20,7 @@ class LoggerFactoryTest extends TestCase
         $mock = $this
             ->getMockBuilder(\Laminas\ServiceManager\ServiceManager::class)
             ->disableOriginalConstructor()
-            ->setMethods(['get'])
+            ->onlyMethods(['get'])
             ->getMock();
 
         $mock->expects($this->once())
@@ -36,11 +35,11 @@ class LoggerFactoryTest extends TestCase
      * Checks if factory creates apropriate logger service. When app is invoked from CLI, logger should output
      * everything back to the user instead of only logging it
      * @dataProvider loggerInstancesDataProvider
-     * @param $loggerClass class name of created service
+     * @param class-string $loggerClass class name of created service
      * @param $requestObject Request object
      * @throws \Exception
      */
-    public function testLoggerCreatedInstanceOfLogger($isConsoleRequest, $loggerClass)
+    public function testLoggerCreatedInstanceOfLogger(bool $isConsoleRequest, $loggerClass): void
     {
         $systemLogLogger = $this->getMockBuilder(SystemLogLogger::class)
             ->disableOriginalConstructor()
@@ -48,25 +47,25 @@ class LoggerFactoryTest extends TestCase
 
         $replaceTraceProcessor = new ReplaceTraceArgsProcessor(["asd" => "asdasd"]);
 
-        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->setMethods(['requestIsConsole'])->getMock();
+        $mockSapiHelper = $this->getMockBuilder(SapiHelper::class)->disableOriginalConstructor()->onlyMethods(['requestIsConsole'])->getMock();
         $mockSapiHelper->expects($this->atLeastOnce())
             ->method('requestIsConsole')
             ->willReturn($isConsoleRequest);
-        $mockContainer = $this->getMockBuilder(ContainerInterface::class)->disableOriginalConstructor()->setMethods(['get', 'has'])->getMock();
+        $mockContainer = $this->getMockBuilder(ContainerInterface::class)->disableOriginalConstructor()->onlyMethods(['get', 'has'])->getMock();
 
         $mockContainer->expects($this->atLeastOnce())
             ->method('get')
-            ->will($this->returnCallback(function ($arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper) {
+            ->will($this->returnCallback(function (mixed $arg) use ($systemLogLogger, $replaceTraceProcessor, $mockSapiHelper) {
                 $map = array(
                     'Config' => ['DvsaApplicationLogger' => []],
                     SapiHelper::class => $mockSapiHelper,
-                    'tokenService' => $this->getMockBuilder(TokenService::class)->disableOriginalConstructor()->setMethods(['getToken'])->getMock(),
+                    'tokenService' => $this->getMockBuilder(TokenServiceInterface::class)->disableOriginalConstructor()->onlyMethods(['getToken'])->getMock(),
                      SystemLogLogger::class => $systemLogLogger,
                      ReplaceTraceArgsProcessor::class => $replaceTraceProcessor,
                     'MotIdentityProvider' => null
                 );
                 return $map[$arg];
-        }));
+            }));
 
         $factory = new LoggerFactory();
         $logger = $factory($mockContainer, null, []);

@@ -1,11 +1,14 @@
 <?php
+
 namespace DvsaApplicationLogger\Listener;
 
 use Laminas\EventManager\ListenerAggregateInterface;
 use Laminas\EventManager\EventManagerInterface;
-use Laminas\EventManager\EventInterface;
+use Laminas\Log\Writer\WriterInterface;
 use Laminas\Log\Logger as Log;
 use Laminas\Mvc\MvcEvent;
+use Laminas\Http\PhpEnvironment\Request as PhpRequest;
+use Laminas\Http\PhpEnvironment\Response as PhpResponse;
 
 /**
  * Class Request
@@ -14,9 +17,9 @@ use Laminas\Mvc\MvcEvent;
  */
 class Response implements ListenerAggregateInterface
 {
-
     /**
      * @var Log
+     * @psalm-suppress PropertyNotSetInConstructor
      */
     protected $log;
 
@@ -93,6 +96,7 @@ class Response implements ListenerAggregateInterface
 
     /**
      * @param EventManagerInterface $events
+     * @param int $priority
      *
      * @todo is this method redundant now the listeners are attached in Module.php?
      */
@@ -108,41 +112,43 @@ class Response implements ListenerAggregateInterface
     public function detach(EventManagerInterface $events)
     {
         foreach ($this->getListeners() as $index => $listener) {
-            if ($events->detach($listener)) {
-                $this->removeListener($index);
-            }
+            $events->detach($listener);
+            $this->removeListener($index);
         }
     }
 
     /**
      * @param MvcEvent $event
      */
-    public function logResponse(MvcEvent $event)
+    public function logResponse(MvcEvent $event): void
     {
-        if ($event->getRequest() instanceOf \Laminas\Http\PhpEnvironment\Request) {
+        $request = $event->getRequest();
+        if ($request instanceof PhpRequest) {
+            /** @var PhpResponse */
+            $response = $event->getResponse();
+            /** @var string */
+            $host = $request->getUri()->getHost();
+
             $this->getLog()->debug(
                 print_r(
                     array(
-                        $event->getRequest()->getUri()->getHost() => array(
+                         $host => array(
                             'Response' => array(
-                                'statusCode' => $event->getResponse()->getStatusCode(),
-                                'content'    => $event->getResponse()->getContent()
+                                'statusCode' => $response->getStatusCode(),
+                                'content'    => $response->getContent()
                             )
                         )
-                    )
-                    ,
+                    ),
                     true
                 )
             );
         }
     }
 
-    /**
-     * @param EventInterface $event
-     */
-    public function shutdown(EventInterface $event)
+    public function shutdown(): void
     {
-        foreach($this->getLog()->getWriters() as $writer) {
+        /** @var WriterInterface */
+        foreach ($this->getLog()->getWriters() as $writer) {
             $writer->shutdown();
         }
     }

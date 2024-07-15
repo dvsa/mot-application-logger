@@ -1,10 +1,8 @@
 <?php
 
-
 namespace DvsaApplicationLogger\Formatter;
 
 use Laminas\Log\Formatter\Base;
-
 
 /**
  * A formatting class for general log messages.
@@ -13,8 +11,8 @@ use Laminas\Log\Formatter\Base;
  */
 class General extends Base
 {
-    protected $logFieldDelimiter = '||';
-    protected $logEntryPrefix = '^^*';
+    protected string $logFieldDelimiter = '||';
+    protected string $logEntryPrefix = '^^*';
 
     /**
      * @var array
@@ -74,7 +72,11 @@ class General extends Base
      * Format the event into a message string.
      *
      * @param array $event
-     * @return array|mixed|string
+     *
+     * @return string
+     *
+     * @psalm-suppress ImplementedReturnTypeMismatch
+     * @phpstan-ignore method.childReturnType
      */
     public function format($event)
     {
@@ -95,15 +97,15 @@ class General extends Base
     {
         $data = [];
 
-        if (array_key_exists('extra', $event)
+        if (
+            array_key_exists('extra', $event)
             && array_key_exists('__dvsa_metadata__', $event['extra'])
         ) {
             foreach ($event['extra']['__dvsa_metadata__'] as $key => $value) {
                 $data[$key] = $value;
             }
             unset($event['extra']['__dvsa_metadata__']);
-            if(empty($event['extra']))
-            {
+            if (empty($event['extra'])) {
                 unset($event['extra']);
             }
         }
@@ -117,12 +119,13 @@ class General extends Base
      * @param array $event array containing event data.
      * @return array
      */
-    protected function getEventData(array $event){
+    protected function getEventData(array $event)
+    {
         $data = $this->flattenEventData($event);
 
         $out = [];
         foreach ($this->output as $name) {
-            if(isset($data[$name])) {
+            if (isset($data[$name])) {
                 $out[$name] = $this->normalize($data[$name]);
             } else {
                 $out[$name] = '';
@@ -131,5 +134,4 @@ class General extends Base
 
         return $out;
     }
-
 }

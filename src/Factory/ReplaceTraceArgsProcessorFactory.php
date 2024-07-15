@@ -10,12 +10,17 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
 {
     /**
      * @param ContainerInterface $container
+     * @param string|null $name
+     *
      * @return ReplaceTraceArgsProcessor
      */
     public function __invoke(ContainerInterface $container, $name, array $options = null)
     {
+        /** @var array */
+        $config = $container->get('Config');
+
         return new ReplaceTraceArgsProcessor(
-            $this->createDatabaseCredentialsMasking($container->get('Config'))
+            $this->createDatabaseCredentialsMasking($config)
         );
     }
 
@@ -27,7 +32,8 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
     {
         $replaceMap = [];
 
-        if(isset($config['DvsaApplicationLogger']['maskDatabaseCredentials'])
+        if (
+            isset($config['DvsaApplicationLogger']['maskDatabaseCredentials'])
             && isset($config["doctrine"]["connection"]["orm_default"]["params"])
         ) {
             $maskCredentialsConfig = $config['DvsaApplicationLogger']['maskDatabaseCredentials'];
@@ -36,8 +42,8 @@ class ReplaceTraceArgsProcessorFactory implements FactoryInterface
 
             $doctrineConnectionParams = $config["doctrine"]["connection"]["orm_default"]["params"];
 
-            if(!empty($argsToMask)) {
-                foreach($argsToMask as $arg) {
+            if (!is_null($argsToMask) && !empty($argsToMask)) {
+                foreach ($argsToMask as $arg) {
                     $replaceMap[$doctrineConnectionParams[$arg]] = $mask;
                 }
             }

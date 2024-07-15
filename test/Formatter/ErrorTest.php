@@ -1,17 +1,20 @@
 <?php
+
 namespace DvsaApplicationLoggerTest\Formatter;
 
+use DvsaApplicationLogger\Formatter\General;
 use DvsaApplicationLogger\Formatter\Error;
+use DvsaApplicationLogger\Formatter\Json;
 use DvsaApplicationLoggerTest\Formatter;
 
 class ErrorTest extends TestCase
 {
     /**
-     * @var Error
+     * @var General|Error|Json
      */
     protected $formatter;
 
-    protected $formatterFields = [
+    protected array $formatterFields = [
         'microtimeTimestamp' => '',
         'priority' => '',
         'priorityName' => '',
@@ -29,7 +32,7 @@ class ErrorTest extends TestCase
         'stacktrace' => '',
     ];
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new Error();
     }
@@ -40,7 +43,7 @@ class ErrorTest extends TestCase
      * @param array $event
      * @param string $expectedOutput
      */
-    public function testOutputFormat($event, $expectedOutput)
+    public function testOutputFormat($event, $expectedOutput): void
     {
         $this->assertEquals($expectedOutput, $this->formatter->format($event));
     }
@@ -49,7 +52,7 @@ class ErrorTest extends TestCase
      * Test that the output format matches the requirements on
      * https://wiki.i-env.net/display/EA/Logging+Formats
      */
-    public function testOutputFormatContainsRelevantProperties()
+    public function testOutputFormatContainsRelevantProperties(): void
     {
         $expectedPriority = 7;
         $expectedPriorityName = 'DEBUG';
@@ -105,6 +108,8 @@ class ErrorTest extends TestCase
             ]
         );
 
-        $this->assertStringEndsWith($expectedString, $this->formatter->format($event));
+        /** @var string */
+        $actual = $this->formatter->format($event);
+        $this->assertStringEndsWith($expectedString, $actual);
     }
 }

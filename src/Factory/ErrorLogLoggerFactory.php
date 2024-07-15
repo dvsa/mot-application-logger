@@ -12,6 +12,9 @@ class ErrorLogLoggerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $name, array $args = null)
     {
-        return new SystemLogLogger(new ErrorLogWriter(), $container->get(ReplaceTraceArgsProcessor::class));
+        /** @var ReplaceTraceArgsProcessor */
+        $argsProcessor = $container->get(ReplaceTraceArgsProcessor::class);
+
+        return new SystemLogLogger(new ErrorLogWriter(), $argsProcessor);
     }
 }

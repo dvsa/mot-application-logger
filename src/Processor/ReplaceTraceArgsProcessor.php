@@ -16,7 +16,7 @@ class ReplaceTraceArgsProcessor implements ProcessorInterface
      */
     private $replaceTo;
 
-    public function __construct($replaceMap)
+    public function __construct(array $replaceMap)
     {
         $this->replaceFrom = array_keys($replaceMap);
         $this->replaceTo = array_values($replaceMap);
@@ -30,12 +30,12 @@ class ReplaceTraceArgsProcessor implements ProcessorInterface
      */
     public function process(array $event)
     {
-        if($event["priority"] <= Logger::ERR) {
-            if(!empty($event["extra"]["trace"])) {
+        if ($event["priority"] <= Logger::ERR) {
+            if (!empty($event["extra"]["trace"])) {
                 $trace = &$event["extra"]["trace"];
 
-                array_walk_recursive($trace, function(&$item) {
-                    if(is_string($item)) {
+                array_walk_recursive($trace, function (mixed &$item) {
+                    if (is_string($item)) {
                         $item = str_replace($this->replaceFrom, $this->replaceTo, $item);
                     }
                 });

@@ -7,6 +7,8 @@ use DvsaApplicationLogger\Helper\SapiHelper;
 use DvsaApplicationLogger\Log\ConsoleLogger;
 use DvsaApplicationLogger\Log\SystemLogLogger;
 use DvsaApplicationLogger\Processor\ReplaceTraceArgsProcessor;
+use DvsaApplicationLogger\TokenService\TokenServiceInterface;
+use DvsaApplicationLogger\Formatter\General;
 use Exception;
 use Interop\Container\ContainerInterface;
 use Laminas\Http\Request as LaminasHttpRequest;
@@ -21,10 +23,11 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 /**
  * Class LoggerFactory.
  * @package DvsaApplicationLogger\Factory
+ *
+ * @psalm-suppress MissingConstructor
  */
 class LoggerFactory implements FactoryInterface
 {
-
     /**
      * @var Logger $logger
      */
@@ -42,13 +45,14 @@ class LoggerFactory implements FactoryInterface
      * Creates a general purpose logger.
      *
      * @param ContainerInterface $container
-     * @param string $name
+     * @param string|null $name
      * @param array $args
      * @return Logger|object
      * @throws Exception
      */
     public function __invoke(ContainerInterface $container, $name, array $args = null)
     {
+        /** @var array */
         $config = $container->get('Config');
         if (!array_key_exists('DvsaApplicationLogger', $config)) {
             throw new \RuntimeException('A DvsaApplicationLogger config can not be loaded.');
@@ -79,15 +83,22 @@ class LoggerFactory implements FactoryInterface
      */
     protected function createHttpRequestLogger(ContainerInterface $serviceLocator)
     {
+        /** @var array */
         $config = $serviceLocator->get('Config');
 
         $applicationLoggerConfig = $config['DvsaApplicationLogger'];
-        $this->logger = new Logger([], $serviceLocator->get(SystemLogLogger::class), $serviceLocator);
+        /** @var SystemLogLogger */
+        $systemLogLogger = $serviceLocator->get(SystemLogLogger::class);
+        $this->logger = new Logger([], $systemLogLogger, $serviceLocator);
 
-        /** @var \Dvsa\Mot\Frontend\AuthenticationModule\Service\WebAuthenticationCookieService $tokenService */
+        /** @var TokenServiceInterface $tokenService */
         $tokenService = $serviceLocator->get('tokenService');
+
         $this->logger->setToken($tokenService->getToken());
-        $this->logger->addProcessor($serviceLocator->get(ReplaceTraceArgsProcessor::class));
+
+        /** @var ReplaceTraceArgsProcessor */
+        $argsProcessor = $serviceLocator->get(ReplaceTraceArgsProcessor::class);
+        $this->logger->addProcessor($argsProcessor);
         $this->writerCollection($applicationLoggerConfig);
         $this->fallbackOnNoopWriter();
         return $this->logger;
@@ -100,10 +111,14 @@ class LoggerFactory implements FactoryInterface
      */
     protected function createConsoleRequestLogger(ContainerInterface $serviceLocator)
     {
-
-        $this->logger = new ConsoleLogger([], $serviceLocator->get(SystemLogLogger::class), $serviceLocator);
+        /** @var SystemLogLogger */
+        $systemLogLogger = $serviceLocator->get(SystemLogLogger::class);
+        $this->logger = new ConsoleLogger([], $systemLogLogger, $serviceLocator);
         $writer = new Stream('php://output');
-        $this->logger->addProcessor($serviceLocator->get(ReplaceTraceArgsProcessor::class));
+
+        /** @var ReplaceTraceArgsProcessor */
+        $argsProcessor = $serviceLocator->get(ReplaceTraceArgsProcessor::class);
+        $this->logger->addProcessor($argsProcessor);
         $this->logger->addWriter($writer);
         return $this->logger;
     }
@@ -115,16 +130,18 @@ class LoggerFactory implements FactoryInterface
      */
     private function writerCollection(array $config)
     {
+        $writers = 0;
+
         if (!empty($config['writers'])) {
-            $writers = 0;
             foreach ($config['writers'] as $writer) {
                 if ($writer['enabled']) {
-                    $this->writerAdapter( $writer );
-                    $writers ++;
+                    $this->writerAdapter($writer);
+                    $writers++;
                 }
             }
-            return $writers;
         }
+
+        return $writers;
     }
 
     /**
@@ -158,10 +175,10 @@ class LoggerFactory implements FactoryInterface
     /**
      * @param array $config
      */
-    private function configuration(array $config)
+    private function configuration(array $config): void
     {
-        if (!empty($config['registerExceptionHandler'])) {
-            $config['registerExceptionHandler'] === false ?: LaminasLogger::registerExceptionHandler( $this->logger );
+        if (!empty($config['registerExceptionHandler']) && $config['registerExceptionHandler'] !== false) {
+            LaminasLogger::registerExceptionHandler($this->logger);
         }
     }
 
@@ -170,21 +187,27 @@ class LoggerFactory implements FactoryInterface
      */
     private function fallbackOnNoopWriter()
     {
-        if ($this->logger->getWriters()->count() == 0) {
-            return $this->logger->addWriter(new \Laminas\Log\Writer\Noop);
+        if ($this->logger->getWriters()->count() === 0) {
+            return $this->logger->addWriter(new \Laminas\Log\Writer\Noop());
         }
+
+        return $this->logger;
     }
 
     /**
      * @param array $config
-     * @return mixed
+     * @return General
      * @throws Exception
      */
-    private function getWriterFormatter(array $config) {
+    private function getWriterFormatter(array $config)
+    {
         $class = $config['options']['formatter']['name'];
 
         if (class_exists($class)) {
-            return new $class();
+            /** @var General */
+            $output = new $class();
+
+            return $output;
         } else {
             throw new Exception("Unable to instantiate a formatter. Class $class does not exist.");
         }

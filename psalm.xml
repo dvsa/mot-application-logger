@@ -14,4 +14,14 @@
             <directory name="vendor" />
         </ignoreFiles>
     </projectFiles>
+        <issueHandlers>
+        <!-- Suppress the PropertyNotSetInConstructor error in the test folder only. -->
+        <!-- Many of the test files extend AbstractControllerTestCase which uses a few unset properties -->
+        <!-- that are not set in a constructor, but are legitimate. -->
+        <PropertyNotSetInConstructor>
+            <errorLevel type="suppress">
+                <directory name="test" />
+            </errorLevel>
+        </PropertyNotSetInConstructor>
+    </issueHandlers>
 </psalm>

@@ -2,16 +2,18 @@
 
 namespace DvsaApplicationLoggerTest\Formatter;
 
+use DvsaApplicationLogger\Formatter\General;
+use DvsaApplicationLogger\Formatter\Error;
 use DvsaApplicationLogger\Formatter\Json;
 
 class JsonTest extends TestCase
 {
     /**
-     * @var Json
+     * @var General|Error|Json
      */
     protected $formatter;
 
-    protected $formatterFields = [
+    protected array $formatterFields = [
         'microtimeTimestamp',
         'timestamp',
         'priority',
@@ -29,7 +31,7 @@ class JsonTest extends TestCase
         'stacktrace',
     ];
 
-    public function setUp():void
+    public function setUp(): void
     {
         $this->formatter = new Json();
     }
@@ -40,7 +42,7 @@ class JsonTest extends TestCase
      *
      * @throws \Exception
      */
-    public function testOutputFormatContainsRelevantProperties()
+    public function testOutputFormatContainsRelevantProperties(): void
     {
         $expectedPriority = 7;
         $expectedPriorityName = 'DEBUG';
@@ -75,22 +77,23 @@ class JsonTest extends TestCase
         ];
 
         $expectedString = "{\"priority\":\"$expectedPriority\","
-            ."\"priorityName\":\"$expectedPriorityName\","
-            ."\"level\":\"$expectedLevel\","
-            ."\"message\":\"$expectedMessage\","
-            ."\"callerName\":\"$errorLocation\","
-            ."\"logger_name\":\"$errorLocation\","
-            ."\"logEntryType\":\"$expectedLogEntryType\","
-            ."\"microtimeTimestamp\":\"\","
-            ."\"timestamp\":\"\","
-            ."\"username\":\"$expectedUsername\","
-            ."\"token\":\"$expectedToken\","
-            ."\"errorCode\":\"$expectedExceptionCode\","
-            ."\"exceptionType\":\"$expectedExceptionType\","
-            ."\"stacktrace\":\"$expectedStackTrace\","
-            ."\"extra\":\"{\\\"foo\\\":\\\"bar\\\"}\"}";
+            . "\"priorityName\":\"$expectedPriorityName\","
+            . "\"level\":\"$expectedLevel\","
+            . "\"message\":\"$expectedMessage\","
+            . "\"callerName\":\"$errorLocation\","
+            . "\"logger_name\":\"$errorLocation\","
+            . "\"logEntryType\":\"$expectedLogEntryType\","
+            . "\"microtimeTimestamp\":\"\","
+            . "\"timestamp\":\"\","
+            . "\"username\":\"$expectedUsername\","
+            . "\"token\":\"$expectedToken\","
+            . "\"errorCode\":\"$expectedExceptionCode\","
+            . "\"exceptionType\":\"$expectedExceptionType\","
+            . "\"stacktrace\":\"$expectedStackTrace\","
+            . "\"extra\":\"{\\\"foo\\\":\\\"bar\\\"}\"}";
 
         $expectedJson = json_decode($expectedString, true);
+        /** @var array */
         $outputJson = json_decode($this->formatter->format($event), true);
 
         foreach ($this->formatterFields as $field) {
