@@ -46,5 +46,6 @@
             "laminas/laminas-dependency-plugin": true,
             "captainhook/plugin-composer": true
         }
-    }
+    },
+    "abandoned": "dvsa/mot-logger"
 }
